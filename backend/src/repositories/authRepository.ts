@@ -7,6 +7,7 @@ type UserRecord = Prisma.UserCreateInput & { id?: number };
 export const createAuthRepository = (userRepo?: {
   findByLineId: (lineId: string) => Promise<any | null>;
   createUser: (data: { lineId: string; displayName: string; role: string }) => Promise<any>;
+  updateUserProfile: (userId: string, data: { displayName?: string; role?: string }) => Promise<any>;
 }) => {
   const backing =
     userRepo ??
@@ -14,6 +15,8 @@ export const createAuthRepository = (userRepo?: {
       return {
         findByLineId: (lineId: string) => prisma.user.findUnique({ where: { lineId } }),
         createUser: (data: { lineId: string; displayName: string; role: string }) => prisma.user.create({ data }),
+        updateUserProfile: (userId: string, data: { displayName?: string; role?: string }) =>
+          prisma.user.update({ where: { id: userId }, data: { displayName: data.displayName, role: data.role } }),
       };
     })();
 
@@ -29,5 +32,10 @@ export const createAuthRepository = (userRepo?: {
     return impl.createUser(data as any);
   };
 
-  return { findUserByLineId, createUser } as const;
+  const updateUserProfile = async (userId: string, data: { displayName?: string; role?: string }) => {
+    const impl = await getBacking();
+    return impl.updateUserProfile(userId, data);
+  };
+
+  return { findUserByLineId, createUser, updateUserProfile } as const;
 };

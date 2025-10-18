@@ -3,6 +3,7 @@ import { getHelloWorld } from '../controllers/index';
 import { createAuthController } from '../controllers/authController';
 import { createAuthService } from '../services/authService';
 import { createAuthRepository } from '../repositories/authRepository';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ const authService = createAuthService(authRepo);
 const authController = createAuthController(authService);
 
 router.post('/auth/line', authController.postLineAuth);
+router.put('/users/me/profile', authMiddleware, authController.putMyProfile);
 
 export default router;

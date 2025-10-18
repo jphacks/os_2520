@@ -18,5 +18,20 @@ export const createAuthController = (service = createAuthService()) => {
     }
   };
 
-  return { postLineAuth } as const;
+  const putMyProfile = async (req: Request, res: Response) => {
+    const body = req.body ?? {};
+    const user = (req as any).user;
+    if (!user || !user.userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    try {
+      const updated = await (service as any).updateProfile(user.userId, body);
+      return res.status(200).json({ userId: updated.id, displayName: updated.displayName, role: updated.role });
+    } catch (err: any) {
+      if (err && err.code === 'BAD_REQUEST') return res.status(400).json({ error: err.message });
+      console.error('putMyProfile error:', err);
+      return res.status(500).json({ error: 'internal server error' });
+    }
+  };
+
+  return { postLineAuth, putMyProfile } as const;
 };

@@ -22,6 +22,7 @@ export const verifyLineIdToken = async (idToken: string): Promise<VerifyResult> 
 type AuthRepoShape = {
   findUserByLineId: (lineId: string) => Promise<any | null>;
   createUser: (data: { lineId: string; displayName: string; role: string }) => Promise<any>;
+  updateUserProfile?: (userId: string, data: { displayName?: string; role?: string }) => Promise<any>;
 };
 
 export const createAuthService = (repo: AuthRepoShape | (() => AuthRepoShape | Promise<AuthRepoShape>) = createAuthRepository()) => {
@@ -41,5 +42,29 @@ export const createAuthService = (repo: AuthRepoShape | (() => AuthRepoShape | P
     return { token, isNewUser, user };
   };
 
-  return { loginWithLine } as const;
+  const updateProfile = async (userId: string, payload: { displayName?: string; role?: string }) => {
+    const repository: AuthRepoShape = typeof repo === 'function' ? await (repo() as Promise<AuthRepoShape>) : repo;
+    const { displayName, role } = payload ?? {};
+
+    if (!displayName || typeof displayName !== 'string' || displayName.trim() === '') {
+      const e: any = new Error('displayName is required');
+      e.code = 'BAD_REQUEST';
+      throw e;
+    }
+    if (!role || !['grandparent', 'family'].includes(role)) {
+      const e: any = new Error('invalid role');
+      e.code = 'BAD_REQUEST';
+      throw e;
+    }
+    if (!repository.updateUserProfile) {
+      const e: any = new Error('update not supported');
+      e.code = 'INTERNAL';
+      throw e;
+    }
+
+    const user = await repository.updateUserProfile(userId, { displayName: displayName.trim(), role });
+    return user;
+  };
+
+  return { loginWithLine, updateProfile } as const;
 };
