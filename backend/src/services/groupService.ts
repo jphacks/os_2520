@@ -22,6 +22,8 @@ export const createGroupService = (groupRepository: {
   createGroupMember: (data: { userId: string; groupId: string; isOwner: boolean }) => Promise<any>;
   findGroupByGroupId: (groupId: string) => Promise<any | null>;
   findGroupMemberByUserIdAndGroupId: (userId: string, groupId: string) => Promise<any | null>;
+  getUserGroupMembership: (userId: string) => Promise<any | null>;
+  getGroupMembersWithAnswerStats: (groupId: string) => Promise<any[]>;
 }) => {
   // 新規グループを作成する
   const createNewGroup = async (
@@ -129,5 +131,40 @@ export const createGroupService = (groupRepository: {
     };
   };
 
-  return { createNewGroup, joinGroup } as const;
+  // グループメンバーの正答率ランキングを取得する
+  const getMemberStats = async (userId: string) => {
+    // ユーザーのグループメンバーシップを確認
+    const membership = await groupRepository.getUserGroupMembership(userId);
+    if (!membership) {
+      throw new Error('グループに所属していません。');
+    }
+
+    // グループメンバーと回答統計を取得
+    const members = await groupRepository.getGroupMembersWithAnswerStats(membership.groupId);
+
+    // 各メンバーの正答率を計算
+    const stats = members.map((member) => {
+      const answers = member.user.answers;
+      const totalAnswers = answers.length;
+      const correctAnswers = answers.filter((answer: any) => answer.isCorrect).length;
+
+      // 正答率を計算（回答がない場合は0）
+      const correctRate = totalAnswers > 0 ? correctAnswers / totalAnswers : 0;
+
+      return {
+        userId: member.user.id,
+        displayName: member.user.displayName,
+        correctRate: Math.round(correctRate * 100) / 100, // 小数点第2位まで
+      };
+    });
+
+    // 正答率でソート（降順）
+    stats.sort((a, b) => b.correctRate - a.correctRate);
+
+    return {
+      members: stats,
+    };
+  };
+
+  return { createNewGroup, joinGroup, getMemberStats } as const;
 };

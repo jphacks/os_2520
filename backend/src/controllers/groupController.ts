@@ -113,5 +113,37 @@ export const createGroupController = (service = createGroupService({} as any)) =
     }
   };
 
-  return { postGroup, postGroupJoin } as const;
+  // GET /groups/stats/members - グループメンバーの正答率ランキングを取得
+  const getGroupStatsMembers = async (req: Request, res: Response) => {
+    const user = (req as any).user;
+
+    // 認証チェック
+    if (!user || !user.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+      const stats = await service.getMemberStats(user.userId);
+      return res.status(200).json(stats);
+    } catch (err: any) {
+      console.error('getGroupStatsMembers error:', err);
+
+      // グループに所属していない場合は404を返す
+      if (err.message === 'グループに所属していません。') {
+        return res.status(404).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      if (err.message) {
+        return res.status(400).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+  return { postGroup, postGroupJoin, getGroupStatsMembers } as const;
 };

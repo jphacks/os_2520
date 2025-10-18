@@ -34,6 +34,7 @@ const groupController = createGroupController(groupService);
 
 router.post('/groups', authMiddleware, groupController.postGroup);
 router.post('/groups/join', authMiddleware, groupController.postGroupJoin);
+router.get('/groups/stats/members', authMiddleware, groupController.getGroupStatsMembers);
 
 // Quiz DI container
 const quizRepo = createQuizRepository();

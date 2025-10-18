@@ -12,6 +12,8 @@ export const createGroupRepository = (groupRepo?: {
   createGroupMember: (data: { userId: string; groupId: string; isOwner: boolean }) => Promise<any>;
   findGroupByGroupId: (groupId: string) => Promise<any | null>;
   findGroupMemberByUserIdAndGroupId: (userId: string, groupId: string) => Promise<any | null>;
+  getUserGroupMembership: (userId: string) => Promise<any | null>;
+  getGroupMembersWithAnswerStats: (groupId: string) => Promise<any[]>;
 }) => {
   const backing =
     groupRepo ??
@@ -37,6 +39,35 @@ export const createGroupRepository = (groupRepo?: {
               userId_groupId: {
                 userId,
                 groupId,
+              },
+            },
+          }),
+        // ユーザーのグループメンバーシップを取得
+        getUserGroupMembership: (userId: string) =>
+          prisma.groupMember.findFirst({
+            where: { userId },
+            include: { group: true },
+          }),
+        // グループメンバーの回答統計を取得
+        getGroupMembersWithAnswerStats: (groupId: string) =>
+          prisma.groupMember.findMany({
+            where: { groupId },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  displayName: true,
+                  answers: {
+                    where: {
+                      quiz: {
+                        groupId,
+                      },
+                    },
+                    select: {
+                      isCorrect: true,
+                    },
+                  },
+                },
               },
             },
           }),
@@ -70,5 +101,22 @@ export const createGroupRepository = (groupRepo?: {
     return impl.findGroupMemberByUserIdAndGroupId(userId, groupId);
   };
 
-  return { createGroup, createGroupMember, findGroupByGroupId, findGroupMemberByUserIdAndGroupId } as const;
+  const getUserGroupMembership = async (userId: string) => {
+    const impl = await getBacking();
+    return impl.getUserGroupMembership(userId);
+  };
+
+  const getGroupMembersWithAnswerStats = async (groupId: string) => {
+    const impl = await getBacking();
+    return impl.getGroupMembersWithAnswerStats(groupId);
+  };
+
+  return {
+    createGroup,
+    createGroupMember,
+    findGroupByGroupId,
+    findGroupMemberByUserIdAndGroupId,
+    getUserGroupMembership,
+    getGroupMembersWithAnswerStats,
+  } as const;
 };
