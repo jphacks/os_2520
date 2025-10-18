@@ -2,7 +2,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 
-function HappyPage() {
+function OldPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const nickname = (location.state as { nickname: string })?.nickname;
@@ -47,32 +47,41 @@ const handleSend = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/quizzes', {
+    // APIエンドポイントの指定
+    const API_BASE_URL = "https://api.example.com"; // 実際のAPIのURLに変更してください
+    
+    // APIリクエストの作成
+    const response = await fetch(`${API_BASE_URL}/quizzes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}` // JWTトークンの追加
       },
       body: JSON.stringify({
-        nickname,
-        question,
-        choices,
-        correctIndex,
+        question: question.trim(),
+        choices: choices.map(choice => ({
+          text: choice.trim(),
+          isCorrect: choices.indexOf(choice) === correctIndex
+        })),
+        theme: null, // オプショナル：テーマ機能を実装する場合に使用
       })
     });
 
     if (!response.ok) {
-      throw new Error('送信に失敗しました');
+      const errorData = await response.json();
+      throw new Error(errorData.message || '送信に失敗しました');
     }
 
     const data = await response.json();
-    console.log('送信成功:', data);
-    alert("送信完了！");
-    navigate("/");
+    console.log('クイズ作成成功:', data);
+    alert("クイズを出題しました！");
+    navigate("/"); // ダッシュボードへ戻る
   } catch (error) {
     console.error('エラー:', error);
-    alert("送信中にエラーが発生しました。");
+    alert("エラーが発生しました。");
   }
 };
+
 
 // ...existing code...
   return (
@@ -96,7 +105,7 @@ const handleSend = async () => {
       </div>
 
       <div style={{ marginBottom: 12 }}>
-        <label>選択肢（4つ） ※各最大20文字</label>
+        <label style={{whiteSpace: "pre"}}>選択肢（4つ） ※各最大20文字           正解</label>
         <br />
         {choices.map((c, i) => (
           <div key={i} style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
@@ -109,13 +118,6 @@ const handleSend = async () => {
               style={{ width: "65%", padding: 6 }}
             />
             <small style={{ width: 60, textAlign: "left" }}>{c.length}/20</small>
-          </div>
-        ))}
-        <br />
-      </div>
-      <p>正解を選んで下さい</p>
-      {choices.map((c, i) => (
-       <div key={i} style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
             <input
                 type="radio"
                 name="correct"
@@ -124,8 +126,10 @@ const handleSend = async () => {
                 disabled={c.trim() === ""}
                 />
                 {` ${i + 1}`}
-      </div> ))}
-
+          </div>
+        ))}
+        <br />
+      </div>
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={() => navigate("/")}>戻る</button>
         <button onClick={handleSend}>出題</button>
@@ -134,5 +138,5 @@ const handleSend = async () => {
   );
 }
 
-export default HappyPage;
+export default OldPage;
 // ...existing code...
