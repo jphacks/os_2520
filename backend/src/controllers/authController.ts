@@ -3,15 +3,18 @@ import { createAuthService } from '../services/authService';
 
 export const createAuthController = (service = createAuthService()) => {
   const postLineAuth = async (req: Request, res: Response) => {
-    const { idToken } = req.body ?? {};
-    if (!idToken) return res.status(400).json({ error: 'idToken is required' });
+    const { code } = req.body ?? {};
+    if (!code) return res.status(400).json({ error: 'code is required' });
 
     try {
-      const result = await service.loginWithLine(idToken);
+      const result = await service.loginWithLine(code);
       return res.status(200).json({ token: result.token, isNewUser: result.isNewUser });
     } catch (err: any) {
-      if (err && (err.code === 'UNAUTHORIZED' || err.message === 'Invalid idToken')) {
-        return res.status(401).json({ error: 'invalid idToken' });
+      if (err && err.code === 'BAD_REQUEST') {
+        return res.status(400).json({ error: err.message });
+      }
+      if (err && (err.code === 'UNAUTHORIZED' || err.message === 'Invalid authorization code')) {
+        return res.status(401).json({ error: 'invalid authorization code' });
       }
       console.error('authController error:', err);
       return res.status(500).json({ error: 'internal server error' });
