@@ -4,19 +4,8 @@ import { createGroupService } from '../services/groupService';
 export const createGroupController = (service = createGroupService({} as any)) => {
   // POST /groups - 新規グループ作成
   const postGroup = async (req: Request, res: Response) => {
-    // デバッグログ: リクエストボディの内容を確認
-    console.log('=== POST /groups デバッグ ===');
-    console.log('req.body:', req.body);
-    console.log('req.body type:', typeof req.body);
-    console.log('req.headers:', req.headers);
-
     const { groupName, password, alertFrequencyDays } = req.body ?? {};
-    console.log('groupName:', groupName, 'type:', typeof groupName);
-    console.log('password:', password, 'type:', typeof password);
-    console.log('alertFrequencyDays:', alertFrequencyDays, 'type:', typeof alertFrequencyDays);
-
     const user = (req as any).user;
-    console.log('user:', user);
 
     // 認証チェック
     if (!user || !user.userId) {
@@ -78,5 +67,51 @@ export const createGroupController = (service = createGroupService({} as any)) =
     }
   };
 
-  return { postGroup } as const;
+  // POST /groups/join - グループ参加
+  const postGroupJoin = async (req: Request, res: Response) => {
+    const { groupId, password } = req.body ?? {};
+    const user = (req as any).user;
+
+    // 認証チェック
+    if (!user || !user.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // バリデーション: 必須フィールドのチェック
+    if (!groupId) {
+      return res.status(400).json({
+        errors: [{ field: 'groupId', message: 'グループIDは必須です。' }],
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        errors: [{ field: 'password', message: 'パスワードは必須です。' }],
+      });
+    }
+
+    try {
+      const result = await service.joinGroup(user.userId, groupId, password);
+      return res.status(200).json(result);
+    } catch (err: any) {
+      console.error('postGroupJoin error:', err);
+
+      // エラーメッセージに応じてステータスコードを変更
+      if (err.message === 'グループが見つかりません。' || err.message === 'パスワードが正しくありません。') {
+        return res.status(404).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      if (err.message) {
+        return res.status(400).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+  return { postGroup, postGroupJoin } as const;
 };

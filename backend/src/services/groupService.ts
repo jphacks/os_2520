@@ -21,6 +21,7 @@ export const createGroupService = (groupRepository: {
   }) => Promise<any>;
   createGroupMember: (data: { userId: string; groupId: string; isOwner: boolean }) => Promise<any>;
   findGroupByGroupId: (groupId: string) => Promise<any | null>;
+  findGroupMemberByUserIdAndGroupId: (userId: string, groupId: string) => Promise<any | null>;
 }) => {
   // 新規グループを作成する
   const createNewGroup = async (
@@ -86,5 +87,47 @@ export const createGroupService = (groupRepository: {
     };
   };
 
-  return { createNewGroup } as const;
+  // 既存グループに参加する
+  const joinGroup = async (userId: string, groupId: string, password: string) => {
+    // groupIdのバリデーション
+    if (!groupId || groupId.trim().length === 0) {
+      throw new Error('グループIDは必須です。');
+    }
+
+    // パスワードのバリデーション
+    if (!password || password.trim().length === 0) {
+      throw new Error('パスワードは必須です。');
+    }
+
+    // グループの存在確認
+    const group = await groupRepository.findGroupByGroupId(groupId.trim());
+    if (!group) {
+      throw new Error('グループが見つかりません。');
+    }
+
+    // パスワードの検証
+    const isPasswordValid = await bcrypt.compare(password, group.passwordHash);
+    if (!isPasswordValid) {
+      throw new Error('パスワードが正しくありません。');
+    }
+
+    // すでにグループに参加しているか確認
+    const existingMember = await groupRepository.findGroupMemberByUserIdAndGroupId(userId, group.id);
+    if (existingMember) {
+      throw new Error('既にこのグループに参加しています。');
+    }
+
+    // グループメンバーを作成（オーナーではない）
+    await groupRepository.createGroupMember({
+      userId,
+      groupId: group.id,
+      isOwner: false,
+    });
+
+    return {
+      message: 'Successfully joined group',
+    };
+  };
+
+  return { createNewGroup, joinGroup } as const;
 };

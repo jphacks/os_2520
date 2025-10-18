@@ -11,6 +11,7 @@ export const createGroupRepository = (groupRepo?: {
   }) => Promise<any>;
   createGroupMember: (data: { userId: string; groupId: string; isOwner: boolean }) => Promise<any>;
   findGroupByGroupId: (groupId: string) => Promise<any | null>;
+  findGroupMemberByUserIdAndGroupId: (userId: string, groupId: string) => Promise<any | null>;
 }) => {
   const backing =
     groupRepo ??
@@ -30,6 +31,15 @@ export const createGroupRepository = (groupRepo?: {
             data,
           }),
         findGroupByGroupId: (groupId: string) => prisma.group.findUnique({ where: { groupId } }),
+        findGroupMemberByUserIdAndGroupId: (userId: string, groupId: string) =>
+          prisma.groupMember.findUnique({
+            where: {
+              userId_groupId: {
+                userId,
+                groupId,
+              },
+            },
+          }),
       };
     })();
 
@@ -55,5 +65,10 @@ export const createGroupRepository = (groupRepo?: {
     return impl.findGroupByGroupId(groupId);
   };
 
-  return { createGroup, createGroupMember, findGroupByGroupId } as const;
+  const findGroupMemberByUserIdAndGroupId = async (userId: string, groupId: string) => {
+    const impl = await getBacking();
+    return impl.findGroupMemberByUserIdAndGroupId(userId, groupId);
+  };
+
+  return { createGroup, createGroupMember, findGroupByGroupId, findGroupMemberByUserIdAndGroupId } as const;
 };

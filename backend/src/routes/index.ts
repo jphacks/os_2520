@@ -6,6 +6,9 @@ import { createAuthRepository } from '../repositories/authRepository';
 import { createGroupController } from '../controllers/groupController';
 import { createGroupService } from '../services/groupService';
 import { createGroupRepository } from '../repositories/groupRepository';
+import { createQuizController } from '../controllers/quizController';
+import { createQuizService } from '../services/quizService';
+import { createQuizRepository } from '../repositories/quizRepository';
 import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -30,5 +33,14 @@ const groupService = createGroupService(groupRepo);
 const groupController = createGroupController(groupService);
 
 router.post('/groups', authMiddleware, groupController.postGroup);
+router.post('/groups/join', authMiddleware, groupController.postGroupJoin);
+
+// Quiz DI container
+const quizRepo = createQuizRepository();
+const quizService = createQuizService(quizRepo);
+const quizController = createQuizController(quizService);
+
+router.post('/quizzes', authMiddleware, quizController.postQuiz);
+router.get('/quizzes/pending', authMiddleware, quizController.getPendingQuiz);
 
 export default router;
