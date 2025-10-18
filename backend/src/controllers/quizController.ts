@@ -147,5 +147,46 @@ export const createQuizController = (service = createQuizService({} as any)) => 
     }
   };
 
-  return { postQuiz, getPendingQuiz, postQuizAnswer } as const;
+  // GET /quizzes/history - 過去クイズ一覧取得
+  const getQuizHistory = async (req: Request, res: Response) => {
+    const user = (req as any).user;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+
+    // 認証チェック
+    if (!user || !user.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // バリデーション: pageとlimitの範囲チェック
+    if (page < 1) {
+      return res.status(400).json({
+        errors: [{ field: 'page', message: 'ページ番号は1以上である必要があります。' }],
+      });
+    }
+
+    if (limit < 1 || limit > 100) {
+      return res.status(400).json({
+        errors: [{ field: 'limit', message: '取得件数は1〜100の範囲である必要があります。' }],
+      });
+    }
+
+    try {
+      const result = await service.getQuizHistory(user.userId, page, limit);
+      return res.status(200).json(result);
+    } catch (err: any) {
+      console.error('getQuizHistory error:', err);
+
+      // エラーメッセージがある場合
+      if (err.message) {
+        return res.status(400).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+  return { postQuiz, getPendingQuiz, postQuizAnswer, getQuizHistory } as const;
 };

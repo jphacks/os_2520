@@ -19,6 +19,7 @@ export const createQuizService = (quizRepository: {
     isCorrect: boolean;
     message?: string;
   }) => Promise<any>;
+  getQuizHistory: (groupId: string, page: number, limit: number) => Promise<{ quizzes: any[]; total: number }>;
 }) => {
   // クイズを作成する
   const createNewQuiz = async (
@@ -185,5 +186,43 @@ export const createQuizService = (quizRepository: {
     };
   };
 
-  return { createNewQuiz, getPendingQuiz, answerQuiz } as const;
+  // 過去クイズ一覧を取得する
+  const getQuizHistory = async (userId: string, page: number = 1, limit: number = 20) => {
+    // ユーザーが所属するグループを取得
+    const groupMembership = await quizRepository.getUserGroupMembership(userId);
+    if (!groupMembership) {
+      throw new Error('グループに所属していません。');
+    }
+
+    // 過去クイズ一覧を取得
+    const { quizzes, total } = await quizRepository.getQuizHistory(groupMembership.groupId, page, limit);
+
+    // レスポンス形式に整形
+    const formattedQuizzes = quizzes.map((quiz: any) => ({
+      quizId: quiz.id,
+      questionText: quiz.questionText,
+      createdAt: quiz.createdAt,
+      grandparent: {
+        id: quiz.grandparent.id,
+        displayName: quiz.grandparent.displayName,
+      },
+      answers: quiz.answers.map((answer: any) => ({
+        familyMemberId: answer.familyMember.id,
+        familyMemberName: answer.familyMember.displayName,
+        selectedOption: answer.selectedOption.optionText,
+        isCorrect: answer.isCorrect,
+        message: answer.message,
+        answeredAt: answer.createdAt,
+      })),
+    }));
+
+    return {
+      quizzes: formattedQuizzes,
+      total,
+      page,
+      limit,
+    };
+  };
+
+  return { createNewQuiz, getPendingQuiz, answerQuiz, getQuizHistory } as const;
 };

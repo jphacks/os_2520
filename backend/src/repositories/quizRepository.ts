@@ -23,6 +23,7 @@ export const createQuizRepository = (quizRepo?: {
     isCorrect: boolean;
     message?: string;
   }) => Promise<any>;
+  getQuizHistory: (groupId: string, page: number, limit: number) => Promise<{ quizzes: any[]; total: number }>;
 }) => {
   const backing =
     quizRepo ??
@@ -126,6 +127,50 @@ export const createQuizRepository = (quizRepo?: {
           prisma.answer.create({
             data,
           }),
+        getQuizHistory: async (groupId: string, page: number, limit: number) => {
+          const skip = (page - 1) * limit;
+
+          // 総数を取得
+          const total = await prisma.quiz.count({
+            where: { groupId },
+          });
+
+          // クイズ一覧を取得（ページネーション付き）
+          const quizzes = await prisma.quiz.findMany({
+            where: { groupId },
+            orderBy: {
+              createdAt: 'desc', // 新しい順
+            },
+            skip,
+            take: limit,
+            include: {
+              grandparent: {
+                select: {
+                  id: true,
+                  displayName: true,
+                },
+              },
+              answers: {
+                include: {
+                  familyMember: {
+                    select: {
+                      id: true,
+                      displayName: true,
+                    },
+                  },
+                  selectedOption: {
+                    select: {
+                      id: true,
+                      optionText: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          return { quizzes, total };
+        },
       };
     })();
 
@@ -187,6 +232,11 @@ export const createQuizRepository = (quizRepo?: {
     return impl.createAnswer(data);
   };
 
+  const getQuizHistory = async (groupId: string, page: number, limit: number) => {
+    const impl = await getBacking();
+    return impl.getQuizHistory(groupId, page, limit);
+  };
+
   return {
     createQuiz,
     getUserById,
@@ -197,5 +247,6 @@ export const createQuizRepository = (quizRepo?: {
     getQuizOptionById,
     checkExistingAnswer,
     createAnswer,
+    getQuizHistory,
   } as const;
 };
