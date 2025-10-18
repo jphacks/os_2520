@@ -1,3 +1,6 @@
+import { sendLineMessageBulk } from "./lineMessagingService";
+import { buildQuizNotificationMessage } from "./lineMessageBuilder";
+
 export const createQuizService = (quizRepository: {
   createQuiz: (data: {
     groupId: string;
@@ -19,7 +22,11 @@ export const createQuizService = (quizRepository: {
     isCorrect: boolean;
     message?: string;
   }) => Promise<any>;
-  getQuizHistory: (groupId: string, page: number, limit: number) => Promise<{ quizzes: any[]; total: number }>;
+  getQuizHistory: (
+    groupId: string,
+    page: number,
+    limit: number
+  ) => Promise<{ quizzes: any[]; total: number }>;
 }) => {
   // クイズを作成する
   const createNewQuiz = async (
@@ -30,47 +37,49 @@ export const createQuizService = (quizRepository: {
     // ユーザー情報を取得
     const user = await quizRepository.getUserById(userId);
     if (!user) {
-      throw new Error('ユーザーが見つかりません。');
+      throw new Error("ユーザーが見つかりません。");
     }
 
     // ロール権限チェック (grandparentロールのみ)
-    if (user.role !== 'grandparent') {
-      const error: any = new Error('クイズ作成はgrandparentロールのみ実行できます。');
-      error.code = 'FORBIDDEN';
+    if (user.role !== "grandparent") {
+      const error: any = new Error(
+        "クイズ作成はgrandparentロールのみ実行できます。"
+      );
+      error.code = "FORBIDDEN";
       throw error;
     }
 
     // ユーザーが所属するグループを取得
     const groupMembership = await quizRepository.getUserGroupMembership(userId);
     if (!groupMembership) {
-      throw new Error('グループに所属していません。');
+      throw new Error("グループに所属していません。");
     }
 
     // バリデーション: questionTextの必須チェック
     if (!questionText || questionText.trim().length === 0) {
-      throw new Error('クイズの問題文は必須です。');
+      throw new Error("クイズの問題文は必須です。");
     }
 
     // バリデーション: questionTextの長さチェック (100文字以内)
     if (questionText.length > 100) {
-      throw new Error('クイズの問題文は100文字以内である必要があります。');
+      throw new Error("クイズの問題文は100文字以内である必要があります。");
     }
 
     // バリデーション: optionsの必須チェック
     if (!options || options.length < 2) {
-      throw new Error('選択肢は2つ以上必要です。');
+      throw new Error("選択肢は2つ以上必要です。");
     }
 
     // バリデーション: 正解が1つ以上存在するかチェック
     const hasCorrectAnswer = options.some((opt) => opt.isCorrect === true);
     if (!hasCorrectAnswer) {
-      throw new Error('正解の選択肢が1つ以上必要です。');
+      throw new Error("正解の選択肢が1つ以上必要です。");
     }
 
     // バリデーション: 各選択肢のテキストが空でないかチェック
     for (const option of options) {
       if (!option.optionText || option.optionText.trim().length === 0) {
-        throw new Error('選択肢のテキストは空にできません。');
+        throw new Error("選択肢のテキストは空にできません。");
       }
     }
 
@@ -83,23 +92,49 @@ export const createQuizService = (quizRepository: {
     });
 
     // 家族メンバーを取得（LINE通知用）
-    const familyMembers = await quizRepository.getGroupMembersByGroupId(groupMembership.groupId);
+    const familyMembers = await quizRepository.getGroupMembersByGroupId(
+      groupMembership.groupId
+    );
 
-    // LINE通知を送信（後で実装）
-    // TODO: LINE通知機能を実装
-    // familyMembersのうち、grandparent以外のメンバーにLINE通知を送信
-    // エラーが発生した場合もクイズは作成されているので、警告として扱う
+    // LINE通知を送信
     try {
-      // await sendLineNotification(familyMembers, quiz);
-      console.log('LINE通知送信（未実装）:', familyMembers.length, 'メンバー');
+      // 祖父母の名前を取得
+      const grandparentName = user.displayName || "祖父母";
+
+      // クイズ回答URLを生成
+      const frontendUrl = process.env.FRONTEND_URL || "https://your-app.com";
+      const quizUrl = `${frontendUrl}/quiz/${quiz.id}`;
+
+      // メッセージビルダーでクイズ通知メッセージを作成
+      const messages = buildQuizNotificationMessage(
+        grandparentName,
+        questionText,
+        quizUrl
+      );
+
+      // grandparent以外の家族メンバーにのみ通知
+      const familyLineUserIds = familyMembers
+        .filter((member) => member.user?.role !== "grandparent") // grandparentを除外
+        .map((member) => member.user?.lineId)
+        .filter((lineId): lineId is string => !!lineId);
+
+      if (familyLineUserIds.length > 0) {
+        // 一括送信
+        const result = await sendLineMessageBulk(familyLineUserIds, messages);
+        console.log(
+          `LINEクイズ通知送信完了: 成功 ${result.successCount}件, 失敗 ${result.failureCount}件`
+        );
+      } else {
+        console.warn("送信先の家族メンバーが見つかりませんでした。");
+      }
     } catch (lineError: any) {
-      console.error('LINE通知送信エラー:', lineError);
+      console.error("LINE通知送信エラー:", lineError);
       // LINE送信エラーは警告として扱い、クイズ作成は成功とする
     }
 
     return {
       quizId: quiz.id,
-      message: 'Quiz created successfully',
+      message: "Quiz created successfully",
     };
   };
 
@@ -108,11 +143,14 @@ export const createQuizService = (quizRepository: {
     // ユーザーが所属するグループを取得
     const groupMembership = await quizRepository.getUserGroupMembership(userId);
     if (!groupMembership) {
-      throw new Error('グループに所属していません。');
+      throw new Error("グループに所属していません。");
     }
 
     // 未回答の最新クイズを取得
-    const pendingQuiz = await quizRepository.getPendingQuiz(userId, groupMembership.groupId);
+    const pendingQuiz = await quizRepository.getPendingQuiz(
+      userId,
+      groupMembership.groupId
+    );
 
     // 未回答クイズがない場合はnullを返す
     if (!pendingQuiz) {
@@ -135,33 +173,43 @@ export const createQuizService = (quizRepository: {
   };
 
   // クイズに回答する
-  const answerQuiz = async (userId: string, quizId: string, selectedOptionId: string, message?: string) => {
+  const answerQuiz = async (
+    userId: string,
+    quizId: string,
+    selectedOptionId: string,
+    message?: string
+  ) => {
     // クイズの存在確認
     const quiz = await quizRepository.getQuizById(quizId);
     if (!quiz) {
-      const error: any = new Error('クイズが見つかりません。');
-      error.code = 'NOT_FOUND';
+      const error: any = new Error("クイズが見つかりません。");
+      error.code = "NOT_FOUND";
       throw error;
     }
 
     // 選択肢の存在確認
-    const selectedOption = await quizRepository.getQuizOptionById(selectedOptionId);
+    const selectedOption = await quizRepository.getQuizOptionById(
+      selectedOptionId
+    );
     if (!selectedOption) {
-      const error: any = new Error('選択肢が見つかりません。');
-      error.code = 'NOT_FOUND';
+      const error: any = new Error("選択肢が見つかりません。");
+      error.code = "NOT_FOUND";
       throw error;
     }
 
     // 選択肢がこのクイズに属しているか確認
     if (selectedOption.quizId !== quizId) {
-      throw new Error('選択した選択肢はこのクイズのものではありません。');
+      throw new Error("選択した選択肢はこのクイズのものではありません。");
     }
 
     // 既に回答済みかチェック
-    const existingAnswer = await quizRepository.checkExistingAnswer(quizId, userId);
+    const existingAnswer = await quizRepository.checkExistingAnswer(
+      quizId,
+      userId
+    );
     if (existingAnswer) {
-      const error: any = new Error('既にこのクイズに回答済みです。');
-      error.code = 'CONFLICT';
+      const error: any = new Error("既にこのクイズに回答済みです。");
+      error.code = "CONFLICT";
       throw error;
     }
 
@@ -178,7 +226,9 @@ export const createQuizService = (quizRepository: {
     });
 
     // 正解の選択肢IDを取得
-    const correctOption = quiz.options.find((opt: any) => opt.isCorrect === true);
+    const correctOption = quiz.options.find(
+      (opt: any) => opt.isCorrect === true
+    );
 
     return {
       isCorrect,
@@ -187,15 +237,23 @@ export const createQuizService = (quizRepository: {
   };
 
   // 過去クイズ一覧を取得する
-  const getQuizHistory = async (userId: string, page: number = 1, limit: number = 20) => {
+  const getQuizHistory = async (
+    userId: string,
+    page: number = 1,
+    limit: number = 20
+  ) => {
     // ユーザーが所属するグループを取得
     const groupMembership = await quizRepository.getUserGroupMembership(userId);
     if (!groupMembership) {
-      throw new Error('グループに所属していません。');
+      throw new Error("グループに所属していません。");
     }
 
     // 過去クイズ一覧を取得
-    const { quizzes, total } = await quizRepository.getQuizHistory(groupMembership.groupId, page, limit);
+    const { quizzes, total } = await quizRepository.getQuizHistory(
+      groupMembership.groupId,
+      page,
+      limit
+    );
 
     // レスポンス形式に整形
     const formattedQuizzes = quizzes.map((quiz: any) => ({
