@@ -9,6 +9,9 @@ import { createGroupRepository } from '../repositories/groupRepository';
 import { createQuizController } from '../controllers/quizController';
 import { createQuizService } from '../services/quizService';
 import { createQuizRepository } from '../repositories/quizRepository';
+import { createAlertController } from '../controllers/alertController';
+import { createAlertService } from '../services/alertService';
+import { createAlertRepository } from '../repositories/alertRepository';
 import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -45,5 +48,12 @@ router.post('/quizzes', authMiddleware, quizController.postQuiz);
 router.get('/quizzes/pending', authMiddleware, quizController.getPendingQuiz);
 router.get('/quizzes/history', authMiddleware, quizController.getQuizHistory);
 router.post('/quizzes/:quizId/answer', authMiddleware, quizController.postQuizAnswer);
+
+// Alert DI container
+const alertRepo = createAlertRepository();
+const alertService = createAlertService(alertRepo);
+const alertController = createAlertController(alertService);
+
+router.post('/alerts/emergency', authMiddleware, alertController.postEmergencyAlert);
 
 export default router;

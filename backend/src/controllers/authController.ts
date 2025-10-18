@@ -24,8 +24,13 @@ export const createAuthController = (service = createAuthService()) => {
     if (!user || !user.userId) return res.status(401).json({ error: 'Unauthorized' });
 
     try {
-      const updated = await (service as any).updateProfile(user.userId, body);
-      return res.status(200).json({ userId: updated.id, displayName: updated.displayName, role: updated.role });
+      const result = await (service as any).updateProfile(user.userId, body);
+      return res.status(200).json({
+        userId: result.user.id,
+        displayName: result.user.displayName,
+        role: result.user.role,
+        token: result.token
+      });
     } catch (err: any) {
       if (err && err.code === 'BAD_REQUEST') return res.status(400).json({ error: err.message });
       console.error('putMyProfile error:', err);

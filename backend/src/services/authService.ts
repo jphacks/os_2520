@@ -38,7 +38,7 @@ export const createAuthService = (repo: AuthRepoShape | (() => AuthRepoShape | P
       isNewUser = true;
     }
 
-    const token = jwt.sign({ userId: user.id, lineId: user.lineId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    const token = jwt.sign({ userId: user.id, lineId: user.lineId, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     return { token, isNewUser, user };
   };
 
@@ -63,7 +63,11 @@ export const createAuthService = (repo: AuthRepoShape | (() => AuthRepoShape | P
     }
 
     const user = await repository.updateUserProfile(userId, { displayName: displayName.trim(), role });
-    return user;
+
+    // 新しいJWTトークンを発行（roleが変更された可能性があるため）
+    const token = jwt.sign({ userId: user.id, lineId: user.lineId, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+    return { user, token };
   };
 
   return { loginWithLine, updateProfile } as const;
