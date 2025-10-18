@@ -13,6 +13,16 @@ export const createQuizRepository = (quizRepo?: {
   getGroupMembersByGroupId: (groupId: string) => Promise<any[]>;
   getUserGroupMembership: (userId: string) => Promise<any | null>;
   getPendingQuiz: (userId: string, groupId: string) => Promise<any | null>;
+  getQuizById: (quizId: string) => Promise<any | null>;
+  getQuizOptionById: (optionId: string) => Promise<any | null>;
+  checkExistingAnswer: (quizId: string, userId: string) => Promise<any | null>;
+  createAnswer: (data: {
+    quizId: string;
+    familyMemberId: string;
+    selectedOptionId: string;
+    isCorrect: boolean;
+    message?: string;
+  }) => Promise<any>;
 }) => {
   const backing =
     quizRepo ??
@@ -89,6 +99,33 @@ export const createQuizRepository = (quizRepo?: {
             },
           });
         },
+        getQuizById: (quizId: string) =>
+          prisma.quiz.findUnique({
+            where: { id: quizId },
+            include: {
+              options: true,
+            },
+          }),
+        getQuizOptionById: (optionId: string) => prisma.quizOption.findUnique({ where: { id: optionId } }),
+        checkExistingAnswer: (quizId: string, userId: string) =>
+          prisma.answer.findUnique({
+            where: {
+              quizId_familyMemberId: {
+                quizId,
+                familyMemberId: userId,
+              },
+            },
+          }),
+        createAnswer: (data: {
+          quizId: string;
+          familyMemberId: string;
+          selectedOptionId: string;
+          isCorrect: boolean;
+          message?: string;
+        }) =>
+          prisma.answer.create({
+            data,
+          }),
       };
     })();
 
@@ -124,5 +161,41 @@ export const createQuizRepository = (quizRepo?: {
     return impl.getPendingQuiz(userId, groupId);
   };
 
-  return { createQuiz, getUserById, getGroupMembersByGroupId, getUserGroupMembership, getPendingQuiz } as const;
+  const getQuizById = async (quizId: string) => {
+    const impl = await getBacking();
+    return impl.getQuizById(quizId);
+  };
+
+  const getQuizOptionById = async (optionId: string) => {
+    const impl = await getBacking();
+    return impl.getQuizOptionById(optionId);
+  };
+
+  const checkExistingAnswer = async (quizId: string, userId: string) => {
+    const impl = await getBacking();
+    return impl.checkExistingAnswer(quizId, userId);
+  };
+
+  const createAnswer = async (data: {
+    quizId: string;
+    familyMemberId: string;
+    selectedOptionId: string;
+    isCorrect: boolean;
+    message?: string;
+  }) => {
+    const impl = await getBacking();
+    return impl.createAnswer(data);
+  };
+
+  return {
+    createQuiz,
+    getUserById,
+    getGroupMembersByGroupId,
+    getUserGroupMembership,
+    getPendingQuiz,
+    getQuizById,
+    getQuizOptionById,
+    checkExistingAnswer,
+    createAnswer,
+  } as const;
 };

@@ -98,5 +98,54 @@ export const createQuizController = (service = createQuizService({} as any)) => 
     }
   };
 
-  return { postQuiz, getPendingQuiz } as const;
+  // POST /quizzes/:quizId/answer - クイズ回答
+  const postQuizAnswer = async (req: Request, res: Response) => {
+    const { quizId } = req.params;
+    const { selectedOptionId, message } = req.body ?? {};
+    const user = (req as any).user;
+
+    // 認証チェック
+    if (!user || !user.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // バリデーション: 必須フィールドのチェック
+    if (!selectedOptionId) {
+      return res.status(400).json({
+        errors: [{ field: 'selectedOptionId', message: '選択肢IDは必須です。' }],
+      });
+    }
+
+    try {
+      const result = await service.answerQuiz(user.userId, quizId, selectedOptionId, message);
+      return res.status(200).json(result);
+    } catch (err: any) {
+      console.error('postQuizAnswer error:', err);
+
+      // NOT_FOUND エラー
+      if (err.code === 'NOT_FOUND') {
+        return res.status(404).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      // CONFLICT エラー (回答済み)
+      if (err.code === 'CONFLICT') {
+        return res.status(409).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      // その他のバリデーションエラー
+      if (err.message) {
+        return res.status(400).json({
+          errors: [{ field: 'general', message: err.message }],
+        });
+      }
+
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+  return { postQuiz, getPendingQuiz, postQuizAnswer } as const;
 };

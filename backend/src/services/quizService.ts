@@ -9,6 +9,16 @@ export const createQuizService = (quizRepository: {
   getGroupMembersByGroupId: (groupId: string) => Promise<any[]>;
   getUserGroupMembership: (userId: string) => Promise<any | null>;
   getPendingQuiz: (userId: string, groupId: string) => Promise<any | null>;
+  getQuizById: (quizId: string) => Promise<any | null>;
+  getQuizOptionById: (optionId: string) => Promise<any | null>;
+  checkExistingAnswer: (quizId: string, userId: string) => Promise<any | null>;
+  createAnswer: (data: {
+    quizId: string;
+    familyMemberId: string;
+    selectedOptionId: string;
+    isCorrect: boolean;
+    message?: string;
+  }) => Promise<any>;
 }) => {
   // クイズを作成する
   const createNewQuiz = async (
@@ -123,5 +133,57 @@ export const createQuizService = (quizRepository: {
     };
   };
 
-  return { createNewQuiz, getPendingQuiz } as const;
+  // クイズに回答する
+  const answerQuiz = async (userId: string, quizId: string, selectedOptionId: string, message?: string) => {
+    // クイズの存在確認
+    const quiz = await quizRepository.getQuizById(quizId);
+    if (!quiz) {
+      const error: any = new Error('クイズが見つかりません。');
+      error.code = 'NOT_FOUND';
+      throw error;
+    }
+
+    // 選択肢の存在確認
+    const selectedOption = await quizRepository.getQuizOptionById(selectedOptionId);
+    if (!selectedOption) {
+      const error: any = new Error('選択肢が見つかりません。');
+      error.code = 'NOT_FOUND';
+      throw error;
+    }
+
+    // 選択肢がこのクイズに属しているか確認
+    if (selectedOption.quizId !== quizId) {
+      throw new Error('選択した選択肢はこのクイズのものではありません。');
+    }
+
+    // 既に回答済みかチェック
+    const existingAnswer = await quizRepository.checkExistingAnswer(quizId, userId);
+    if (existingAnswer) {
+      const error: any = new Error('既にこのクイズに回答済みです。');
+      error.code = 'CONFLICT';
+      throw error;
+    }
+
+    // 正解かどうかを判定
+    const isCorrect = selectedOption.isCorrect;
+
+    // 回答を保存
+    await quizRepository.createAnswer({
+      quizId,
+      familyMemberId: userId,
+      selectedOptionId,
+      isCorrect,
+      message: message || undefined,
+    });
+
+    // 正解の選択肢IDを取得
+    const correctOption = quiz.options.find((opt: any) => opt.isCorrect === true);
+
+    return {
+      isCorrect,
+      correctOptionId: correctOption?.id || null,
+    };
+  };
+
+  return { createNewQuiz, getPendingQuiz, answerQuiz } as const;
 };

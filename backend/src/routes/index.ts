@@ -42,5 +42,6 @@ const quizController = createQuizController(quizService);
 
 router.post('/quizzes', authMiddleware, quizController.postQuiz);
 router.get('/quizzes/pending', authMiddleware, quizController.getPendingQuiz);
+router.post('/quizzes/:quizId/answer', authMiddleware, quizController.postQuizAnswer);
 
 export default router;
