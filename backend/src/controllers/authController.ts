@@ -74,7 +74,7 @@ export const createAuthController = (service = createAuthService()) => {
       const userWithGroup = await prisma.user.findUnique({
         where: { id: user.userId },
         include: {
-          groupMemberships: {
+          groupsOwned: {
             include: {
               group: true
             }
@@ -87,8 +87,8 @@ export const createAuthController = (service = createAuthService()) => {
       }
 
       // グループに所属しているかチェック
-      const hasGroup = userWithGroup.groupMemberships.length > 0;
-      const groupId = hasGroup ? userWithGroup.groupMemberships[0].group.id : null;
+      const hasGroup = userWithGroup.groupsOwned.length > 0;
+      const groupId = hasGroup ? userWithGroup.groupsOwned[0].group.id : null;
 
       return res.status(200).json({
         userId: user.userId,
