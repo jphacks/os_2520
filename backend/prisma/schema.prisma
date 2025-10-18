@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(cuid()) // PK, CUID
+  lineId      String    @unique // Unique, Not Null
+  displayName String
+  role        String    // 'grandparent' or 'family'
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // リレーション
+  groupsOwned   GroupMember[]
+  quizzesPosted Quiz[]        @relation("GrandparentQuizzes")
+  answers       Answer[]      @relation("FamilyAnswers")
+  alertsTriggered AlertHistory[] @relation("AlertTriggered")
+}
+
+model Group {
+  id                   String    @id @default(cuid()) // PK, CUID
+  groupId              String    @unique // Unique, Not Null (招待用ID)
+  groupName            String
+  passwordHash         String
+  alertFrequencyDays   Float     // アラートを出すまでの日数 (0.5刻み)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // リレーション
+  members GroupMember[]
+  quizzes Quiz[]
+  alerts  AlertHistory[]
+}
+
+model GroupMember {
+  id        String    @id @default(cuid()) // PK, CUID
+  userId    String // FK (User)
+  groupId   String // FK (Group)
+  isOwner   Boolean
+  createdAt DateTime  @default(now())
+
+  // リレーション
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+
+  // 複合インデックス (Userは一つのGroupに一度しか所属できない)
+  @@unique([userId, groupId])
+}
+
+model Quiz {
+  id            String    @id @default(cuid()) // PK, CUID
+  groupId       String // FK (Group)
+  grandparentId String // FK (User) - 出題者
+  questionText  String    // Not Null, Max 100 chars
+  createdAt     DateTime  @default(now()) // 出題日時として利用
+  updatedAt     DateTime  @updatedAt
+
+  // リレーション
+  group   Group  @relation(fields: [groupId], references: [id])
+  grandparent User @relation("GrandparentQuizzes", fields: [grandparentId], references: [id])
+  options QuizOption[]
+  answers Answer[]
+}
+
+model QuizOption {
+  id          String    @id @default(cuid()) // PK, CUID
+  quizId      String // FK (Quiz)
+  optionText  String    // Not Null
+  isCorrect   Boolean   // 正解フラグ
+  createdAt   DateTime  @default(now())
+
+  // リレーション
+  quiz    Quiz  @relation(fields: [quizId], references: [id])
+  // QuizOptionはAnswerからも参照されるため、Answer側にもリレーションを定義
+  selectedBy Answer[]
+}
+
+model Answer {
+  id                String    @id @default(cuid()) // PK, CUID
+  quizId            String // FK (Quiz)
+  familyMemberId    String // FK (User) - 回答者
+  selectedOptionId  String // FK (QuizOption) - ユーザーが選択した選択肢
+  isCorrect         Boolean   // 回答が正解だったか
+  message           String?   // Nullable (祖父母へのメッセージ)
+  createdAt         DateTime  @default(now()) // 回答日時として利用
+
+  // リレーション
+  quiz          Quiz       @relation(fields: [quizId], references: [id])
+  familyMember  User       @relation("FamilyAnswers", fields: [familyMemberId], references: [id])
+  selectedOption QuizOption @relation(fields: [selectedOptionId], references: [id])
+
+  // 複合インデックス (一つのQuizに一人の家族メンバーは一度しか回答できない)
+  @@unique([quizId, familyMemberId])
+}
+
+model AlertHistory {
+  id                String    @id @default(cuid()) // PK, CUID
+  groupId           String // FK (Group)
+  type              String    // 'no_quiz' or 'emergency'
+  triggeredByUserId String? // Nullable, FK (User) - 緊急通知の場合の実行者
+  createdAt         DateTime  @default(now())
+
+  // リレーション
+  group Group @relation(fields: [groupId], references: [id])
+  triggeredByUser User? @relation("AlertTriggered", fields: [triggeredByUserId], references: [id])
+}
