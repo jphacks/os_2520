@@ -9,6 +9,7 @@
     "lint": "eslint './src/**/*.{ts,tsx}' --fix"
   },
   "dependencies": {
+    "@line/bot-sdk": "^10.3.0",
     "@prisma/client": "^6.17.1",
     "@supabase/supabase-js": "^2.75.1",
     "@types/jsonwebtoken": "9.0.10",
