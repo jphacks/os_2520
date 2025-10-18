@@ -1,13 +1,16 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import apiClient from '../lib/axios';
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import apiClient from "../lib/axios";
 
 /**
  * ユーザー情報の型定義
  */
 interface User {
   userId: string;
-  role: 'grandparent' | 'family';
+  role: "grandparent" | "family";
   lineId: string;
+  hasGroup: boolean; // グループに所属しているか
+  groupId: string | null; // 所属しているグループのID
 }
 
 /**
@@ -39,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
    */
   const refreshUser = async () => {
     try {
-      const response = await apiClient.get('/users/me');
+      const response = await apiClient.get("/users/me");
       setUser(response.data);
     } catch (error) {
       // 認証エラーの場合はログアウト状態にする
@@ -85,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

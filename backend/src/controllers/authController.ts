@@ -62,16 +62,45 @@ export const createAuthController = (service = createAuthService()) => {
   /**
    * GET /users/me - 現在のユーザー情報を取得
    * フロントエンドがページリロード時に認証状態を復元するために使用
+   * グループ所属情報も含めて返す
    */
   const getMe = async (req: Request, res: Response) => {
     const user = (req as any).user;
     if (!user || !user.userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    return res.status(200).json({
-      userId: user.userId,
-      role: user.role,
-      lineId: user.lineId
-    });
+    try {
+      // Prismaを使ってユーザー情報とグループ所属情報を取得
+      const prisma = (await import('../prismaClient')).default;
+      const userWithGroup = await prisma.user.findUnique({
+        where: { id: user.userId },
+        include: {
+          groupMemberships: {
+            include: {
+              group: true
+            }
+          }
+        }
+      });
+
+      if (!userWithGroup) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // グループに所属しているかチェック
+      const hasGroup = userWithGroup.groupMemberships.length > 0;
+      const groupId = hasGroup ? userWithGroup.groupMemberships[0].group.id : null;
+
+      return res.status(200).json({
+        userId: user.userId,
+        role: user.role,
+        lineId: user.lineId,
+        hasGroup: hasGroup,
+        groupId: groupId
+      });
+    } catch (error) {
+      console.error('getMe error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
   };
 
   return { postLineAuth, putMyProfile, getMe } as const;

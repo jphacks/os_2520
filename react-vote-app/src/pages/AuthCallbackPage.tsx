@@ -58,8 +58,26 @@ const AuthCallbackPage = () => {
           // 新規ユーザーはプロフィール入力画面へ
           navigate('/profile-setup');
         } else {
-          // 既存ユーザーはホーム画面へ（役割に応じて分岐する場合は後で実装）
-          navigate('/home');
+          // 既存ユーザーの場合、ユーザー情報を取得して遷移先を決定
+          const userResponse = await apiClient.get('/users/me');
+          const user = userResponse.data;
+
+          // プロフィール未設定（displayNameがない）場合はプロフィール設定画面へ
+          if (!user.role) {
+            navigate('/profile-setup');
+          }
+          // グループ未所属の場合はグループ設定画面へ
+          else if (!user.hasGroup) {
+            navigate('/group-setup');
+          }
+          // すべて設定済みの場合は役割に応じたホーム画面へ
+          else {
+            if (user.role === 'grandparent') {
+              navigate('/old'); // 祖父母ダッシュボード
+            } else {
+              navigate('/yang'); // 子・孫ダッシュボード
+            }
+          }
         }
       } catch (err: any) {
         console.error('認証エラー:', err);
