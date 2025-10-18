@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../lib/axios';
 
 /**
  * LINE認証コールバック画面
@@ -16,9 +16,6 @@ const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // バックエンドAPI設定
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -46,20 +43,12 @@ const AuthCallbackPage = () => {
 
         // バックエンドの /auth/line に認可コードを送信
         // バックエンド側でIDトークンの取得と検証を行う
-        const authResponse = await axios.post(
-          `${BACKEND_URL}/auth/line`,
-          { code: code },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        // apiClient は withCredentials: true が設定済み
+        const authResponse = await apiClient.post('/auth/line', { code: code });
 
-        const { token, isNewUser } = authResponse.data;
-
-        // JWTトークンをlocalStorageに保存
-        localStorage.setItem('auth_token', token);
+        // バックエンドはJWTトークンをhttpOnly Cookieに設定するため、
+        // フロントエンド側ではlocalStorageに保存する必要はない
+        const { isNewUser } = authResponse.data;
 
         // sessionStorageのstateをクリア
         sessionStorage.removeItem('line_login_state');
