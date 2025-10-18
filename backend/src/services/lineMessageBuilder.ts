@@ -258,9 +258,7 @@ export const buildQuizNotificationMessage = (
 };
 
 /**
- * クイズ未出題アラート用のメッセージを作成
- *
- * ⚠️ TODO: 後で実装してください
+ * クイズ未出題アラート用のメッセージを作成（FlexMessage）
  *
  * @param daysSinceLastQuiz - 最終クイズからの経過日数
  * @returns LINEメッセージ配列
@@ -268,11 +266,117 @@ export const buildQuizNotificationMessage = (
 export const buildNoQuizAlertMessage = (
   daysSinceLastQuiz: number
 ): line.messagingApi.Message[] => {
-  // TODO: アラート通知のFlexMessageを実装
+  // 経過日数を小数点1桁で表示
+  const daysText = daysSinceLastQuiz.toFixed(1);
+
   return [
     {
-      type: "text",
-      text: `最後のクイズから${daysSinceLastQuiz}日が経過しています。新しいクイズを作成してみませんか？`,
+      type: "flex",
+      altText: `クイズが${daysText}日間届いていません`,
+      contents: {
+        type: "bubble",
+        size: "mega",
+        header: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                {
+                  type: "text",
+                  text: "⚠️",
+                  size: "xl",
+                  flex: 0,
+                  margin: "none",
+                },
+                {
+                  type: "text",
+                  text: "クイズが届いていません",
+                  weight: "bold",
+                  color: "#ffffff",
+                  size: "xl",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          backgroundColor: "#FFD700",
+          paddingAll: "20px",
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "お知らせ",
+              size: "sm",
+              color: "#999999",
+              margin: "md",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: `最後のクイズから${daysText}日が経過しています`,
+                  size: "lg",
+                  weight: "bold",
+                  wrap: true,
+                  color: "#333333",
+                },
+              ],
+            },
+            {
+              type: "separator",
+              margin: "xl",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: "おじいちゃん・おばあちゃんに連絡してみましょう。",
+                  wrap: true,
+                  color: "#666666",
+                  size: "sm",
+                },
+                {
+                  type: "text",
+                  text: "新しいクイズを楽しみに待っています！",
+                  wrap: true,
+                  color: "#666666",
+                  size: "sm",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          paddingAll: "20px",
+        },
+        footer: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "💡 コミュニケーションを大切にしましょう",
+              size: "xs",
+              color: "#FFA500",
+              align: "center",
+            },
+          ],
+          paddingAll: "10px",
+        },
+      },
     },
   ];
 };
