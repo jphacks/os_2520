@@ -19,13 +19,22 @@ export const initQuizAlertCron = () => {
   const task = cron.schedule(
     CRON_SCHEDULE,
     async () => {
-      console.log('[Cron] クイズ未出題アラートcronジョブを実行します');
+      console.log('[Cron] クイズアラート関連cronジョブを実行します');
 
       try {
         const batchService = createBatchService();
-        const result = await batchService.checkAndSendQuizAlerts();
 
-        console.log('[Cron] cronジョブ実行完了:', result);
+        // 1. 家族向けクイズ未出題アラート処理
+        console.log('[Cron] 家族向けクイズ未出題アラート処理を開始...');
+        const familyAlertResult = await batchService.checkAndSendQuizAlerts();
+        console.log('[Cron] 家族向けアラート処理完了:', familyAlertResult);
+
+        // 2. 祖父母向けクイズ出題リマインダー処理
+        console.log('[Cron] 祖父母向けクイズリマインダー処理を開始...');
+        const grandparentReminderResult = await batchService.checkAndSendGrandparentQuizReminders();
+        console.log('[Cron] 祖父母向けリマインダー処理完了:', grandparentReminderResult);
+
+        console.log('[Cron] 全cronジョブ実行完了');
       } catch (error: any) {
         console.error('[Cron] cronジョブ実行中にエラーが発生しました:', error.message);
         // エラーが発生しても次回の実行は継続

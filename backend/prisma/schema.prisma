@@ -101,7 +101,7 @@ model Answer {
 model AlertHistory {
   id                String    @id @default(cuid()) // PK, CUID
   groupId           String // FK (Group)
-  type              String    // 'no_quiz' or 'emergency'
+  type              String    // 'no_quiz' or 'emergency' or 'grandparent_quiz_reminder'
   triggeredByUserId String? // Nullable, FK (User) - 緊急通知の場合の実行者
   createdAt         DateTime  @default(now())
 

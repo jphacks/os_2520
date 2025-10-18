@@ -65,6 +65,54 @@ export const createBatchRepository = () => {
   };
 
   /**
+   * グループの祖父母メンバーを取得（role='grandparent'のみ）
+   *
+   * @param groupId - グループID
+   */
+  const getGroupGrandparents = async (groupId: string) => {
+    const members = await prisma.groupMember.findMany({
+      where: {
+        groupId,
+        user: {
+          role: 'grandparent', // grandparentのみ
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            lineId: true,
+            displayName: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return members;
+  };
+
+  /**
+   * 特定グループ・タイプの最新アラート履歴を取得
+   *
+   * @param groupId - グループID
+   * @param type - アラートタイプ
+   */
+  const getLatestAlertByGroupAndType = async (groupId: string, type: string) => {
+    const alert = await prisma.alertHistory.findFirst({
+      where: {
+        groupId,
+        type,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return alert;
+  };
+
+  /**
    * AlertHistoryを作成
    *
    * @param data - アラート履歴データ
@@ -82,6 +130,8 @@ export const createBatchRepository = () => {
   return {
     getAllGroupsWithLatestQuiz,
     getGroupFamilyMembers,
+    getGroupGrandparents,
+    getLatestAlertByGroupAndType,
     createAlertHistory,
   } as const;
 };

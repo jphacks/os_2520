@@ -380,3 +380,135 @@ export const buildNoQuizAlertMessage = (
     },
   ];
 };
+
+/**
+ * 祖父母向けクイズ出題リマインダーメッセージを作成（FlexMessage）
+ *
+ * @param daysSinceLastQuiz - 最終クイズからの経過日数
+ * @returns LINEメッセージ配列
+ */
+export const buildGrandparentQuizReminderMessage = (
+  daysSinceLastQuiz: number
+): line.messagingApi.Message[] => {
+  // 経過時間を適切な単位で表示
+  let timeText: string;
+  if (daysSinceLastQuiz < 1) {
+    // 1日未満は時間で表示
+    const hours = Math.floor(daysSinceLastQuiz * 24);
+    timeText = `${hours}時間`;
+  } else {
+    // 1日以上は日数で表示（小数点1桁）
+    timeText = `${daysSinceLastQuiz.toFixed(1)}日`;
+  }
+
+  return [
+    {
+      type: "flex",
+      altText: `前回のクイズ出題から${timeText}経過しました`,
+      contents: {
+        type: "bubble",
+        size: "mega",
+        header: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                {
+                  type: "text",
+                  text: "🔔",
+                  size: "xl",
+                  flex: 0,
+                  margin: "none",
+                },
+                {
+                  type: "text",
+                  text: "クイズ出題のお知らせ",
+                  weight: "bold",
+                  color: "#ffffff",
+                  size: "xl",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          backgroundColor: "#32CD32",
+          paddingAll: "20px",
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "リマインダー",
+              size: "sm",
+              color: "#999999",
+              margin: "md",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: `前回のクイズ出題から${timeText}経過したよ！`,
+                  size: "lg",
+                  weight: "bold",
+                  wrap: true,
+                  color: "#333333",
+                },
+              ],
+            },
+            {
+              type: "separator",
+              margin: "xl",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: "そろそろ新しいクイズを出題してみませんか？",
+                  wrap: true,
+                  color: "#666666",
+                  size: "md",
+                },
+                {
+                  type: "text",
+                  text: "家族のみんなが楽しみに待っています！",
+                  wrap: true,
+                  color: "#666666",
+                  size: "sm",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          paddingAll: "20px",
+        },
+        footer: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "💡 アプリからクイズを作成できます",
+              size: "xs",
+              color: "#32CD32",
+              align: "center",
+            },
+          ],
+          paddingAll: "10px",
+        },
+      },
+    },
+  ];
+};
