@@ -1,12 +1,22 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import router from './routes/index';
 import prisma from './prismaClient';
 import { initQuizAlertCron } from './jobs/quizAlertCron';
 
 const app = express();
 
+// CORS設定: フロントエンドからのリクエストを許可し、Cookieの送受信を有効化
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true  // Cookieをフロントエンドとやりとりするためにtrueにする
+}));
+
+// ミドルウェア設定
 app.use(express.json());
+app.use(cookieParser());  // Cookieをパースするミドルウェア
 app.use('/', router);
 
 const server = app.listen(3000, () => {

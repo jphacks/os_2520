@@ -28,6 +28,7 @@ const authService = createAuthService(authRepo);
 const authController = createAuthController(authService);
 
 router.post('/auth/line', authController.postLineAuth);
+router.get('/users/me', authMiddleware, authController.getMe);
 router.put('/users/me/profile', authMiddleware, authController.putMyProfile);
 
 // Group DI container
