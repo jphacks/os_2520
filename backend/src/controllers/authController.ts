@@ -95,7 +95,8 @@ export const createAuthController = (service = createAuthService()) => {
         role: user.role,
         lineId: user.lineId,
         hasGroup: hasGroup,
-        groupId: groupId
+        groupId: groupId,
+        points: userWithGroup.points
       });
     } catch (error) {
       console.error('getMe error:', error);

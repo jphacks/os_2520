@@ -13,6 +13,7 @@ import GroupSetupPage from "./pages/GroupSetupPage.tsx";
 import CreateGroupPage from "./pages/CreateGroupPage.tsx";
 import JoinGroupPage from "./pages/JoinGroupPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
+import RequestPage from "./pages/RequestPage.tsx";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/old" element={<Old />} />
           <Route path="/old/dashboard" element={<OldDashboard />} />
           <Route path="/yang" element={<Yang />} />
+          <Route path="/request" element={<RequestPage />} />
           <Route path="/yang/dashboard" element={<YangDashboard />} /> {/* 追加 */}     
 
           {/* 既存のルート（後で整理予定） */}

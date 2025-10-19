@@ -237,6 +237,42 @@ export const createQuizRepository = (quizRepo?: {
     return impl.getQuizHistory(groupId, page, limit);
   };
 
+  const updateUserPoints = async (userId: string, points: number) => {
+    return prisma.user.update({ where: { id: userId }, data: { points } });
+  };
+
+  const getOldestPendingQuizRequest = async (groupId: string) => {
+    return prisma.quizRequest.findFirst({
+      where: {
+        groupId,
+        requestType: 'quiz',
+        isHandled: false,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            displayName: true,
+            lineId: true,
+          },
+        },
+      },
+    });
+  };
+
+  const markRequestAsHandled = async (requestId: string, quizId: string) => {
+    return prisma.quizRequest.update({
+      where: { id: requestId },
+      data: {
+        isHandled: true,
+        handledQuizId: quizId,
+      },
+    });
+  };
+
   return {
     createQuiz,
     getUserById,
@@ -248,5 +284,8 @@ export const createQuizRepository = (quizRepo?: {
     checkExistingAnswer,
     createAnswer,
     getQuizHistory,
+    updateUserPoints,
+    getOldestPendingQuizRequest,
+    markRequestAsHandled,
   } as const;
 };

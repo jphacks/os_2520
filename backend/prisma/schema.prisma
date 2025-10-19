@@ -12,6 +12,7 @@ model User {
   lineId      String    @unique // Unique, Not Null
   displayName String
   role        String    // 'grandparent' or 'family'
+  points      Int       @default(0) // ポイント残高
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -20,6 +21,7 @@ model User {
   quizzesPosted Quiz[]        @relation("GrandparentQuizzes")
   answers       Answer[]      @relation("FamilyAnswers")
   alertsTriggered AlertHistory[] @relation("AlertTriggered")
+  requests      QuizRequest[] // ユーザーが送信したリクエスト
 }
 
 model Group {
@@ -35,6 +37,7 @@ model Group {
   members GroupMember[]
   quizzes Quiz[]
   alerts  AlertHistory[]
+  requests QuizRequest[] // グループに紐づくリクエスト
 }
 
 model GroupMember {
@@ -57,6 +60,7 @@ model Quiz {
   groupId       String // FK (Group)
   grandparentId String // FK (User) - 出題者
   questionText  String    // Not Null, Max 100 chars
+  requestId     String?   // このクイズが対応したリクエストID (nullable)
   createdAt     DateTime  @default(now()) // 出題日時として利用
   updatedAt     DateTime  @updatedAt
 
@@ -65,6 +69,7 @@ model Quiz {
   grandparent User @relation("GrandparentQuizzes", fields: [grandparentId], references: [id])
   options QuizOption[]
   answers Answer[]
+  handledRequests QuizRequest[] @relation("HandledQuiz") // このクイズで対応したリクエスト
 }
 
 model QuizOption {
@@ -108,4 +113,20 @@ model AlertHistory {
   // リレーション
   group Group @relation(fields: [groupId], references: [id])
   triggeredByUser User? @relation("AlertTriggered", fields: [triggeredByUserId], references: [id])
+}
+
+model QuizRequest {
+  id              String    @id @default(cuid()) // PK, CUID
+  userId          String    // FK (User) - リクエスト送信者
+  groupId         String    // FK (Group) - 所属グループ
+  requestType     String    // 'quiz' or 'other'
+  content         String    // リクエスト内容
+  isHandled       Boolean   @default(false) // クイズリクエストが処理済みか
+  handledQuizId   String?   // 対応したクイズID (nullable)
+  createdAt       DateTime  @default(now())
+
+  // リレーション
+  user         User   @relation(fields: [userId], references: [id])
+  group        Group  @relation(fields: [groupId], references: [id])
+  handledQuiz  Quiz?  @relation("HandledQuiz", fields: [handledQuizId], references: [id])
 }

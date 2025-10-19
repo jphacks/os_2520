@@ -512,3 +512,234 @@ export const buildGrandparentQuizReminderMessage = (
     },
   ];
 };
+
+/**
+ * その他リクエスト通知用のメッセージを作成（FlexMessage）
+ * 祖父母に送信
+ *
+ * @param requesterName - リクエスト送信者の名前
+ * @param content - リクエスト内容
+ * @returns LINEメッセージ配列
+ */
+export const buildRequestNotificationMessage = (
+  requesterName: string,
+  content: string
+): line.messagingApi.Message[] => {
+  return [
+    {
+      type: "flex",
+      altText: `${requesterName}さんからリクエストが届きました`,
+      contents: {
+        type: "bubble",
+        size: "mega",
+        header: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                {
+                  type: "text",
+                  text: "💌",
+                  size: "xl",
+                  flex: 0,
+                  margin: "none",
+                },
+                {
+                  type: "text",
+                  text: "リクエストが届きました",
+                  weight: "bold",
+                  color: "#ffffff",
+                  size: "xl",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          backgroundColor: "#FF69B4",
+          paddingAll: "20px",
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: `${requesterName}さんから`,
+              size: "sm",
+              color: "#999999",
+              margin: "md",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: content,
+                  size: "lg",
+                  weight: "bold",
+                  wrap: true,
+                  color: "#333333",
+                },
+              ],
+            },
+            {
+              type: "separator",
+              margin: "xl",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: "💡 リクエストに応えてあげましょう！",
+                  wrap: true,
+                  color: "#666666",
+                  size: "sm",
+                },
+              ],
+            },
+          ],
+          paddingAll: "20px",
+        },
+      },
+    },
+  ];
+};
+
+/**
+ * クイズリクエスト対応通知用のメッセージを作成（FlexMessage）
+ * リクエスト送信者に送信
+ *
+ * @param requestContent - リクエスト内容
+ * @param quizUrl - クイズ回答画面へのURL
+ * @returns LINEメッセージ配列
+ */
+export const buildQuizRequestHandledMessage = (
+  requestContent: string,
+  quizUrl: string
+): line.messagingApi.Message[] => {
+  return [
+    {
+      type: "flex",
+      altText: `リクエストした「${requestContent}」のクイズが届きました！`,
+      contents: {
+        type: "bubble",
+        size: "mega",
+        header: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                {
+                  type: "text",
+                  text: "🎉",
+                  size: "xl",
+                  flex: 0,
+                  margin: "none",
+                },
+                {
+                  type: "text",
+                  text: "リクエストが叶いました！",
+                  weight: "bold",
+                  color: "#ffffff",
+                  size: "xl",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          backgroundColor: "#32CD32",
+          paddingAll: "20px",
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            {
+              type: "text",
+              text: "リクエストしたテーマ",
+              size: "sm",
+              color: "#999999",
+              margin: "md",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: `「${requestContent}」`,
+                  size: "lg",
+                  weight: "bold",
+                  wrap: true,
+                  color: "#333333",
+                },
+              ],
+            },
+            {
+              type: "separator",
+              margin: "xl",
+            },
+            {
+              type: "box",
+              layout: "vertical",
+              margin: "lg",
+              spacing: "sm",
+              contents: [
+                {
+                  type: "text",
+                  text: "あなたがリクエストしたテーマのクイズが届きました！",
+                  wrap: true,
+                  color: "#666666",
+                  size: "sm",
+                },
+                {
+                  type: "text",
+                  text: "さっそく回答してみましょう！",
+                  wrap: true,
+                  color: "#666666",
+                  size: "sm",
+                  margin: "md",
+                },
+              ],
+            },
+          ],
+          paddingAll: "20px",
+        },
+        footer: {
+          type: "box",
+          layout: "vertical",
+          spacing: "sm",
+          contents: [
+            {
+              type: "button",
+              style: "primary",
+              height: "sm",
+              action: {
+                type: "uri",
+                label: "クイズに回答する",
+                uri: quizUrl,
+              },
+              color: "#32CD32",
+            },
+          ],
+          flex: 0,
+        },
+      },
+    },
+  ];
+};

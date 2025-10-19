@@ -1,5 +1,5 @@
 import { sendLineMessageBulk } from "./lineMessagingService";
-import { buildQuizNotificationMessage } from "./lineMessageBuilder";
+import { buildQuizNotificationMessage, buildQuizRequestHandledMessage } from "./lineMessageBuilder";
 
 export const createQuizService = (quizRepository: {
   createQuiz: (data: {
@@ -27,6 +27,9 @@ export const createQuizService = (quizRepository: {
     page: number,
     limit: number
   ) => Promise<{ quizzes: any[]; total: number }>;
+  updateUserPoints: (userId: string, points: number) => Promise<any>;
+  getOldestPendingQuizRequest: (groupId: string) => Promise<any | null>;
+  markRequestAsHandled: (requestId: string, quizId: string) => Promise<any>;
 }) => {
   // クイズを作成する
   const createNewQuiz = async (
@@ -90,6 +93,31 @@ export const createQuizService = (quizRepository: {
       questionText: questionText.trim(),
       options,
     });
+
+    // 未対応のクイズリクエストがあれば紐付け
+    try {
+      const oldestRequest = await quizRepository.getOldestPendingQuizRequest(
+        groupMembership.groupId
+      );
+
+      if (oldestRequest) {
+        // リクエストを処理済みにする
+        await quizRepository.markRequestAsHandled(oldestRequest.id, quiz.id);
+
+        // リクエスト送信者にLINE通知を送信
+        if (oldestRequest.user?.lineId) {
+          const requestNotificationMessage = buildQuizRequestHandledMessage(
+            oldestRequest.content,
+            `${process.env.FRONTEND_URL || "https://your-app.com"}/quiz/${quiz.id}`
+          );
+          await sendLineMessageBulk([oldestRequest.user.lineId], requestNotificationMessage);
+          console.log(`リクエスト対応通知を送信しました: ${oldestRequest.user.displayName}`);
+        }
+      }
+    } catch (requestError: any) {
+      console.error("リクエスト紐付けエラー:", requestError);
+      // リクエスト紐付けエラーは警告として扱い、クイズ作成は成功とする
+    }
 
     // 家族メンバーを取得（LINE通知用）
     const familyMembers = await quizRepository.getGroupMembersByGroupId(
@@ -224,6 +252,14 @@ export const createQuizService = (quizRepository: {
       isCorrect,
       message: message || undefined,
     });
+
+    // 正解の場合、ポイントを1付与
+    if (isCorrect) {
+      const user = await quizRepository.getUserById(userId);
+      if (user) {
+        await quizRepository.updateUserPoints(userId, user.points + 1);
+      }
+    }
 
     // 正解の選択肢IDを取得
     const correctOption = quiz.options.find(
