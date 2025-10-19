@@ -1,11 +1,50 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "../lib/axios";
 
-const API_BASE_URL = "https://api.example.com"; // 実環境のURLに置き換えてください
+// API設計書に準拠した型定義
 
+// GET /quizzes/pending のレスポンス型（単一クイズまたはnull）
+interface PendingQuizResponse {
+  quizId: string;
+  questionText: string;
+  options: { id: string; optionText: string }[];
+  grandparent: {
+    userId: string;
+    displayName: string;
+  };
+}
+
+// GET /quizzes/history のレスポンス型
+interface QuizHistoryResponse {
+  quizzes: {
+    quizId: string;
+    questionText: string;
+    createdAt: string;
+    answers: {
+      userId: string;
+      displayName: string;
+      isCorrect: boolean;
+      answeredAt: string;
+    }[];
+  }[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// GET /groups/stats/members のレスポンス型
+interface GroupStatsResponse {
+  members: {
+    userId: string;
+    displayName: string;
+    correctRate: number;
+  }[];
+}
+
+// 表示用の型定義
 interface PendingQuiz {
-  id: string;
+  quizId: string;
   question: string;
   choices: { id: string; text: string }[];
   createdAt: string;
@@ -33,34 +72,72 @@ export default function YangDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt") ?? "";
-    const headers = { Authorization: `Bearer ${token}` };
-
-    const fetchAll = async () => {
+    const fetchAll = async (): Promise<void> => {
       setLoading(true);
       setError(null);
       try {
+        // apiClientを使用して複数APIを並行実行（httpOnly Cookie使用）
         const [pendingRes, historyRes, membersRes] = await Promise.all([
-          axios.get<PendingQuiz[]>(`${API_BASE_URL}/quizzes/pending`, { headers }),
-          axios.get<HistoryItem[]>(`${API_BASE_URL}/quizzes/history`, { headers }),
-          axios.get<MemberStat[]>(`${API_BASE_URL}/groups/stats/members`, { headers }),
+          apiClient.get<PendingQuizResponse | null>('/quizzes/pending'),
+          apiClient.get<QuizHistoryResponse>('/quizzes/history'),
+          apiClient.get<GroupStatsResponse>('/groups/stats/members'),
         ]);
 
-        setPending(pendingRes.data ?? []);
-        setHistory(historyRes.data ?? []);
-        setMembers(membersRes.data ?? []);
-      } catch (err) {
-        // catch のエラーは unknown として受け取り、安全に Error に変換する
-        const e: Error = err instanceof Error ? err : new Error(String(err));
-        console.error("YangDashboard fetch error:", e);
-        setError("データの取得に失敗しました。再読み込みしてください。");
+        // /quizzes/pending のレスポンス処理（単一クイズまたはnull → 配列に変換）
+        const pendingData = pendingRes.data;
+        if (pendingData) {
+          setPending([{
+            quizId: pendingData.quizId,
+            question: pendingData.questionText,
+            choices: pendingData.options.map(opt => ({
+              id: opt.id,
+              text: opt.optionText
+            })),
+            createdAt: new Date().toISOString(), // APIレスポンスにcreatedAtがない場合
+          }]);
+        } else {
+          setPending([]);
+        }
+
+        // /quizzes/history のレスポンス処理（quizzesプロパティから配列を取得）
+        const historyData = historyRes.data.quizzes || [];
+        // 現在のユーザーの回答のみを抽出して履歴に表示
+        // TODO: バックエンドから現在のユーザーIDを取得して、そのユーザーの回答のみをフィルタリング
+        const historyItems: HistoryItem[] = historyData.flatMap(quiz =>
+          quiz.answers.map(answer => ({
+            id: `${quiz.quizId}-${answer.userId}`,
+            question: quiz.questionText,
+            isCorrect: answer.isCorrect,
+            answeredAt: answer.answeredAt,
+          }))
+        );
+        setHistory(historyItems);
+
+        // /groups/stats/members のレスポンス処理（membersプロパティから配列を取得）
+        const membersData = membersRes.data.members || [];
+        setMembers(membersData.map(member => ({
+          id: member.userId,
+          name: member.displayName,
+          correctRate: member.correctRate * 100, // 0-1 → 0-100 に変換（API仕様による）
+        })));
+      } catch (err: any) {
+        // エラーハンドリング
+        console.error("YangDashboard データ取得エラー:", err);
+
+        // 401エラーの場合はログイン画面へリダイレクト
+        if (err.response && err.response.status === 401) {
+          setError("認証が切れました。再度ログインしてください。");
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setError("データの取得に失敗しました。再読み込みしてください。");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchAll();
-  }, []);
+  }, [navigate]);
 
   const goToQuiz = (quiz: PendingQuiz) => {
     // /yang ページで quiz を表示・回答する想定
@@ -80,7 +157,7 @@ export default function YangDashboard() {
         ) : (
           <ul style={{ listStyle: "none", padding: 0 }}>
             {pending.map((q) => (
-              <li key={q.id} style={{ borderBottom: "1px solid #eee", padding: "10px 0" }}>
+              <li key={q.quizId} style={{ borderBottom: "1px solid #eee", padding: "10px 0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, color: "#666" }}>{new Date(q.createdAt).toLocaleString()}</div>

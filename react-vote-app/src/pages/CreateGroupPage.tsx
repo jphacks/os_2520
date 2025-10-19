@@ -91,15 +91,15 @@ const CreateGroupPage = () => {
 
   /**
    * モーダルのOKボタンクリック時の処理
-   * 役割に応じたホーム画面へ遷移
+   * 役割に応じたダッシュボードへ遷移
    */
   const handleModalClose = () => {
     setShowModal(false);
-    // 役割に応じてホーム画面へ遷移
+    // 役割に応じてダッシュボードへ遷移
     if (user?.role === "grandparent") {
-      navigate("/old"); // 祖父母ダッシュボード
+      navigate("/old/dashboard"); // 祖父母ダッシュボード
     } else {
-      navigate("/yang"); // 子・孫ダッシュボード
+      navigate("/yang/dashboard"); // 子・孫ダッシュボード
     }
   };
 

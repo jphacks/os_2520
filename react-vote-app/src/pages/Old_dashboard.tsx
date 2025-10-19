@@ -1,8 +1,28 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../lib/axios";
 
-const API_BASE_URL = "https://api.example.com"; // 実際のAPIに置き換えてください
+// API設計書に準拠した型定義
+interface QuizHistoryItem {
+  quizId: string;
+  questionText: string;
+  createdAt: string;
+  answers: {
+    userId: string;
+    displayName: string;
+    isCorrect: boolean;
+    answeredAt: string;
+  }[];
+}
 
+interface QuizHistoryResponse {
+  quizzes: QuizHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// 表示用の型定義（既存のUIに合わせて変換）
 interface QuizSummary {
   id: string;
   question: string;
@@ -19,52 +39,60 @@ function OldDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchHistory = async (): Promise<void> => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE_URL}/quizzes/history`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwt") ?? ""}`,
-          },
+        // apiClientを使用してクイズ履歴APIを呼び出し（httpOnly Cookie使用）
+        const response = await apiClient.get<QuizHistoryResponse>('/quizzes/history');
+
+        // API設計書のレスポンス構造に対応（quizzesプロパティから取得）
+        const historyData = response.data.quizzes || [];
+
+        // 既存のUIに合わせてデータを変換
+        const transformedData: QuizSummary[] = historyData.map(quiz => {
+          const totalAnswers = quiz.answers.length;
+          const correctAnswers = quiz.answers.filter(a => a.isCorrect).length;
+          const correctRate = totalAnswers > 0 ? (correctAnswers / totalAnswers) * 100 : 0;
+
+          return {
+            id: quiz.quizId,
+            question: quiz.questionText,
+            createdAt: quiz.createdAt,
+            correctRate: correctRate,
+            answeredCount: totalAnswers,
+            totalCount: totalAnswers, // TODO: グループメンバー総数を取得する場合は別途APIを呼ぶ
+          };
         });
-        if (!res.ok) {
-          const err = await res.text();
-          throw new Error(err || `status ${res.status}`);
+
+        setQuizzes(transformedData);
+      } catch (err: any) {
+        console.error("クイズ履歴取得エラー:", err);
+
+        // 401エラーの場合はログイン画面へリダイレクト
+        if (err.response && err.response.status === 401) {
+          setError("認証が切れました。再度ログインしてください。");
+          setTimeout(() => navigate('/login'), 2000);
+        } else {
+          setError("履歴の取得に失敗しました。");
         }
-        const data = await res.json();
-        // API側が配列を返す前提。必要なら変換処理を追加してください。
-        setQuizzes(data as QuizSummary[]);
-      } catch (e) {
-        console.error("fetchHistory error:", e);
-        setError("履歴の取得に失敗しました。");
       } finally {
         setLoading(false);
       }
     };
 
     fetchHistory();
-  }, []);
+  }, [navigate]);
 
-  const sendEmergency = async () => {
+  const sendEmergency = async (): Promise<void> => {
     if (!confirm("本当に家族全員に緊急通知を送りますか？")) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/alerts/emergency`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("jwt") ?? ""}`,
-        },
-        body: JSON.stringify({ message: "緊急通知: 既定のメッセージ" }),
-      });
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || `status ${res.status}`);
-      }
+      // API設計書に準拠（リクエストボディなし）
+      // apiClientを使用して緊急通知APIを呼び出し（httpOnly Cookie使用）
+      await apiClient.post('/alerts/emergency');
       alert("緊急通知を送信しました。");
-    } catch (e) {
-      console.error("sendEmergency error:", e);
+    } catch (error) {
+      console.error("緊急通知送信エラー:", error);
       alert("緊急通知の送信に失敗しました。");
     }
   };
@@ -73,8 +101,8 @@ function OldDashboard() {
     <div style={{ padding: 16 }}>
       <h2>祖父母ダッシュボード</h2>
       <div style={{ marginBottom: 12 }}>
-        <button onClick={() => navigate("/")} style={{ marginRight: 8 }}>
-          ホームへ
+        <button onClick={() => navigate("/old")} style={{ marginRight: 8 }}>
+          クイズを作成する
         </button>
         <button onClick={sendEmergency} style={{ background: "#e53935", color: "#fff" }}>
           緊急通知を送る

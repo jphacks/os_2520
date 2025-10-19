@@ -52,11 +52,11 @@ const JoinGroupPage = () => {
         password: password,
       });
 
-      // 参加成功後、役割に応じたホーム画面へ遷移
+      // 参加成功後、役割に応じたダッシュボードへ遷移
       if (user?.role === 'grandparent') {
-        navigate('/old'); // 祖父母ダッシュボード
+        navigate('/old/dashboard'); // 祖父母ダッシュボード
       } else {
-        navigate('/yang'); // 子・孫ダッシュボード
+        navigate('/yang/dashboard'); // 子・孫ダッシュボード
       }
     } catch (err: any) {
       console.error('グループ参加エラー:', err);

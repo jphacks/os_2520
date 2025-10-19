@@ -3,7 +3,26 @@ import { useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import apiClient from "../lib/axios";
 
-const API_BASE_URL = "https://api.example.com"; // 実際のAPIのURLに変更してください
+// 型定義
+interface PendingRequest {
+  requestId: string;
+  content: string;
+  requesterName: string;
+  createdAt: string;
+}
+
+interface QuizCreateRequest {
+  questionText: string;
+  options: {
+    optionText: string;
+    isCorrect: boolean;
+  }[];
+}
+
+interface QuizCreateResponse {
+  quizId: string;
+  message: string;
+}
 
 function OldPage() {
   const location = useLocation();
@@ -13,7 +32,7 @@ function OldPage() {
   const [question, setQuestion] = useState("");
   const [choices, setChoices] = useState<string[]>(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState<number | null>(null);
-  const [pendingRequest, setPendingRequest] = useState<any | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null);
 
   // 未対応のクイズリクエストを取得
   useEffect(() => {
@@ -50,7 +69,7 @@ function OldPage() {
 
   // ...existing code...
 
-const handleSend = async () => {
+const handleSend = async (): Promise<void> => {
   if (!question.trim()) {
     alert("質問を入力してください。");
     return;
@@ -66,57 +85,37 @@ const handleSend = async () => {
   }
 
   try {
-    // APIリクエストの作成
-    const response = await fetch(`${API_BASE_URL}/quizzes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('jwt')}` // JWTトークンの追加
-      },
-      body: JSON.stringify({
-        question: question.trim(),
-        choices: choices.map(choice => ({
-          text: choice.trim(),
-          isCorrect: choices.indexOf(choice) === correctIndex
-        })),
-        theme: null, // オプショナル：テーマ機能を実装する場合に使用
-      })
-    });
+    // API設計書に準拠したリクエストボディの作成
+    const requestBody: QuizCreateRequest = {
+      questionText: question.trim(),
+      options: choices.map((choice, index) => ({
+        optionText: choice.trim(),
+        isCorrect: index === correctIndex
+      }))
+    };
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || '送信に失敗しました');
-    }
+    // apiClientを使用してクイズ作成APIを呼び出し（httpOnly Cookie使用）
+    const response = await apiClient.post<QuizCreateResponse>('/quizzes', requestBody);
 
-    const data = await response.json();
-    console.log('クイズ作成成功:', data);
+    console.log('クイズ作成成功:', response.data);
     alert("クイズを出題しました！");
-    // 変更：作成成功後は祖父母ダッシュボードへ遷移
+    // 作成成功後は祖父母ダッシュボードへ遷移
     navigate("/old/dashboard");
   } catch (error) {
-    console.error('エラー:', error);
-    alert("エラーが発生しました。");
+    console.error('クイズ作成エラー:', error);
+    alert("クイズの出題に失敗しました。もう一度お試しください。");
   }
 };
 
-const sendEmergency = async () => {
+const sendEmergency = async (): Promise<void> => {
   if (!confirm("本当に家族全員に緊急通知を送りますか？")) return;
   try {
-    const res = await fetch(`${API_BASE_URL}/alerts/emergency`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("jwt") ?? ""}`,
-      },
-      body: JSON.stringify({ message: "緊急通知: 既定のメッセージ" }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || `status ${res.status}`);
-    }
+    // API設計書に準拠（リクエストボディなし）
+    // apiClientを使用して緊急通知APIを呼び出し（httpOnly Cookie使用）
+    await apiClient.post('/alerts/emergency');
     alert("緊急通知を送信しました。");
-  } catch (e) {
-    console.error("sendEmergency error:", e);
+  } catch (error) {
+    console.error("緊急通知送信エラー:", error);
     alert("緊急通知の送信に失敗しました。");
   }
 };
