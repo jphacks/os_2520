@@ -75,7 +75,8 @@ const handleSend = async () => {
     const data = await response.json();
     console.log('クイズ作成成功:', data);
     alert("クイズを出題しました！");
-    navigate("/"); // ダッシュボードへ戻る
+    // 変更：作成成功後は祖父母ダッシュボードへ遷移
+    navigate("/old/dashboard");
   } catch (error) {
     console.error('エラー:', error);
     alert("エラーが発生しました。");
@@ -132,7 +133,9 @@ const handleSend = async () => {
       </div>
       <div style={{ display: "flex", gap: 8 }}>
         <button onClick={() => navigate("/")}>戻る</button>
+        <button onClick={() => navigate("/old/dashboard")}>ダッシュボードへ</button>
         <button onClick={handleSend}>出題</button>
+        <button>緊急通知</button>
       </div>
     </div>
   );
