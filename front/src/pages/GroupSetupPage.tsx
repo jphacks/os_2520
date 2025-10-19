@@ -25,29 +25,27 @@ const GroupSetupPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>家族グループの設定</h1>
-        <p style={styles.subtitle}>
+    <div className="min-h-screen flex items-center justify-center bg-line-bg px-4 py-8">
+      <div className="card max-w-2xl w-full">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">
+          家族グループの設定
+        </h1>
+        <p className="text-base text-gray-600 mb-8 text-center">
           家族グループを作成するか、既存のグループに参加してください
         </p>
 
-        <div style={styles.buttonContainer}>
+        <div className="space-y-4 mb-8">
           {/* 新しい家族グループを作成ボタン */}
           <button
             onClick={handleCreateGroup}
-            style={styles.primaryButton}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#0056b3';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#007bff';
-            }}
+            className="w-full flex items-center p-6 bg-line-green text-white rounded-soft hover:bg-line-green-600 transition-all shadow-md"
           >
-            <div style={styles.buttonIcon}>➕</div>
-            <div style={styles.buttonText}>
-              <div style={styles.buttonTitle}>新しい家族グループを作成</div>
-              <div style={styles.buttonDescription}>
+            <div className="text-4xl mr-4">➕</div>
+            <div className="text-left flex-1">
+              <div className="text-lg md:text-xl font-bold mb-1">
+                新しい家族グループを作成
+              </div>
+              <div className="text-sm md:text-base opacity-90">
                 代表者としてグループを作成し、家族を招待します
               </div>
             </div>
@@ -56,133 +54,32 @@ const GroupSetupPage = () => {
           {/* 既存グループに参加ボタン */}
           <button
             onClick={handleJoinGroup}
-            style={styles.secondaryButton}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f5f5f5';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-            }}
+            className="w-full flex items-center p-6 bg-white text-gray-800 rounded-soft border-2 border-line-green hover:bg-line-green-50 transition-all"
           >
-            <div style={styles.buttonIcon}>🔗</div>
-            <div style={styles.buttonText}>
-              <div style={styles.buttonTitle}>既存グループに参加</div>
-              <div style={styles.buttonDescription}>
+            <div className="text-4xl mr-4">🔗</div>
+            <div className="text-left flex-1">
+              <div className="text-lg md:text-xl font-bold mb-1">
+                既存グループに参加
+              </div>
+              <div className="text-sm md:text-base text-gray-600">
                 招待されたグループIDを入力して参加します
               </div>
             </div>
           </button>
         </div>
 
-        <div style={styles.helpText}>
-          <p style={styles.helpTitle}>💡 ヒント</p>
-          <p style={styles.helpContent}>
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-soft p-5">
+          <p className="font-bold text-gray-800 mb-2 flex items-center">
+            <span className="mr-2">💡</span>
+            ヒント
+          </p>
+          <p className="text-sm md:text-base text-gray-700 leading-relaxed">
             家族の代表者が先にグループを作成し、その後他のメンバーが招待IDを使って参加します。
           </p>
         </div>
       </div>
     </div>
   );
-};
-
-// スタイル定義
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  } as React.CSSProperties,
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '40px',
-    maxWidth: '600px',
-    width: '100%',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  } as React.CSSProperties,
-  title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  subtitle: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '32px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    marginBottom: '24px',
-  } as React.CSSProperties,
-  primaryButton: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '20px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    textAlign: 'left',
-  } as React.CSSProperties,
-  secondaryButton: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '20px',
-    backgroundColor: 'white',
-    color: '#333',
-    border: '2px solid #007bff',
-    borderRadius: '12px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    textAlign: 'left',
-  } as React.CSSProperties,
-  buttonIcon: {
-    fontSize: '32px',
-    marginRight: '16px',
-    minWidth: '40px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  buttonText: {
-    flex: 1,
-  } as React.CSSProperties,
-  buttonTitle: {
-    fontSize: '16px',
-    fontWeight: 'bold',
-    marginBottom: '4px',
-  } as React.CSSProperties,
-  buttonDescription: {
-    fontSize: '13px',
-    opacity: 0.9,
-  } as React.CSSProperties,
-  helpText: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    padding: '16px',
-    border: '1px solid #e9ecef',
-  } as React.CSSProperties,
-  helpTitle: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-    margin: '0 0 8px 0',
-  } as React.CSSProperties,
-  helpContent: {
-    fontSize: '13px',
-    color: '#666',
-    lineHeight: '1.6',
-    margin: '0',
-  } as React.CSSProperties,
 };
 
 export default GroupSetupPage;

@@ -105,15 +105,22 @@ const CreateGroupPage = () => {
 
   return (
     <>
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <h1 style={styles.title}>新規グループ作成</h1>
-          <p style={styles.subtitle}>家族グループの情報を入力してください</p>
+      <div className="min-h-screen flex items-center justify-center bg-line-bg px-4 py-8">
+        <div className="card max-w-2xl w-full">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">
+            新規グループ作成
+          </h1>
+          <p className="text-sm md:text-base text-gray-600 mb-8 text-center">
+            家族グループの情報を入力してください
+          </p>
 
-          <form onSubmit={handleSubmit} style={styles.form}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             {/* グループ名 */}
-            <div style={styles.formGroup}>
-              <label htmlFor="groupName" style={styles.label}>
+            <div className="flex flex-col">
+              <label
+                htmlFor="groupName"
+                className="text-sm-readable font-bold text-gray-800 mb-2"
+              >
                 グループ名 *
               </label>
               <input
@@ -123,15 +130,18 @@ const CreateGroupPage = () => {
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="例: 山田家、祖父と孫たち"
                 maxLength={30}
-                style={styles.input}
+                className="input-field"
                 disabled={loading}
               />
-              <p style={styles.hint}>最大30文字</p>
+              <p className="text-xs text-gray-500 mt-1">最大30文字</p>
             </div>
 
             {/* パスワード */}
-            <div style={styles.formGroup}>
-              <label htmlFor="password" style={styles.label}>
+            <div className="flex flex-col">
+              <label
+                htmlFor="password"
+                className="text-sm-readable font-bold text-gray-800 mb-2"
+              >
                 パスワード *
               </label>
               <input
@@ -142,29 +152,32 @@ const CreateGroupPage = () => {
                 placeholder="8文字以上のパスワード"
                 minLength={8}
                 maxLength={36}
-                style={styles.input}
+                className="input-field"
                 disabled={loading}
               />
-              <p style={styles.hint}>最低8文字、最長36文字</p>
+              <p className="text-xs text-gray-500 mt-1">
+                最低8文字、最長36文字
+              </p>
             </div>
 
             {/* クイズ出題頻度 */}
-            <div style={styles.formGroup}>
-              <label htmlFor="alertFrequency" style={styles.label}>
+            <div className="flex flex-col">
+              <label
+                htmlFor="alertFrequency"
+                className="text-sm-readable font-bold text-gray-800 mb-2"
+              >
                 クイズ出題頻度 *
               </label>
               <select
                 id="alertFrequency"
                 value={alertFrequencyDays}
                 onChange={(e) => setAlertFrequencyDays(Number(e.target.value))}
-                style={styles.select}
+                className="input-field cursor-pointer"
                 disabled={loading}
               >
                 <option value={1}>1日</option>
                 <option value={1.5}>1.5日</option>
-                <option value={2} selected>
-                  2日
-                </option>
+                <option value={2}>2日</option>
                 <option value={2.5}>2.5日</option>
                 <option value={3}>3日</option>
                 <option value={3.5}>3.5日</option>
@@ -176,41 +189,32 @@ const CreateGroupPage = () => {
                 <option value={6.5}>6.5日</option>
                 <option value={7}>7日</option>
               </select>
-              <p style={styles.hint}>
+              <p className="text-xs text-gray-500 mt-1">
                 祖父母がこの期間クイズを出さない場合、家族にアラートが通知されます
               </p>
             </div>
 
             {/* エラーメッセージ */}
-            {error && <p style={styles.errorText}>{error}</p>}
+            {error && (
+              <p className="text-sm-readable text-red-700 bg-red-50 p-3 rounded-soft border border-red-200">
+                {error}
+              </p>
+            )}
 
             {/* ボタングループ */}
-            <div style={styles.buttonGroup}>
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => navigate("/group-setup")}
                 disabled={loading}
-                style={styles.backButton}
+                className="flex-1 btn-secondary"
               >
                 戻る
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                style={{
-                  ...styles.submitButton,
-                  ...(loading ? styles.submitButtonDisabled : {}),
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.backgroundColor = "#28a745";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.backgroundColor = "#34c759";
-                  }
-                }}
+                className="flex-[2] btn-primary"
               >
                 {loading ? "作成中..." : "グループを作成"}
               </button>
@@ -221,40 +225,31 @@ const CreateGroupPage = () => {
 
       {/* グループID表示モーダル */}
       {showModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
-            <h2 style={styles.modalTitle}>グループを作成しました！</h2>
-            <p style={styles.modalText}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-soft p-8 max-w-md w-full shadow-lg">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 text-center">
+              グループを作成しました！
+            </h2>
+            <p className="text-sm-readable text-gray-600 mb-6 text-center leading-relaxed">
               以下のグループIDを家族に共有してください。
               <br />
               家族はこのIDとパスワードでグループに参加できます。
             </p>
-            <div style={styles.groupIdBox}>
-              <div style={styles.groupIdLabel}>招待用グループID</div>
-              <div style={styles.groupIdValue}>{createdGroupId}</div>
+            <div className="bg-line-green-50 border-2 border-line-green rounded-soft p-4 mb-4">
+              <div className="text-xs text-gray-600 mb-2 text-center">
+                招待用グループID
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-line-green text-center tracking-wider font-mono">
+                {createdGroupId}
+              </div>
             </div>
             <button
               onClick={handleCopyGroupId}
-              style={styles.copyButton}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#0056b3";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#007bff";
-              }}
+              className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-6 rounded-soft transition-colors duration-200 text-base-readable mb-3"
             >
               📋 IDをコピー
             </button>
-            <button
-              onClick={handleModalClose}
-              style={styles.modalCloseButton}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#28a745";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#34c759";
-              }}
-            >
+            <button onClick={handleModalClose} className="w-full btn-primary">
               OK
             </button>
           </div>
@@ -262,196 +257,6 @@ const CreateGroupPage = () => {
       )}
     </>
   );
-};
-
-// スタイル定義
-const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f5f5f5",
-    padding: "20px",
-  } as React.CSSProperties,
-  card: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "40px",
-    maxWidth: "500px",
-    width: "100%",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  } as React.CSSProperties,
-  title: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: "8px",
-    textAlign: "center",
-  } as React.CSSProperties,
-  subtitle: {
-    fontSize: "14px",
-    color: "#666",
-    marginBottom: "32px",
-    textAlign: "center",
-  } as React.CSSProperties,
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-  } as React.CSSProperties,
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-  } as React.CSSProperties,
-  label: {
-    fontSize: "14px",
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: "8px",
-  } as React.CSSProperties,
-  input: {
-    padding: "12px",
-    fontSize: "14px",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    outline: "none",
-    transition: "border-color 0.2s",
-  } as React.CSSProperties,
-  select: {
-    padding: "12px",
-    fontSize: "14px",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    outline: "none",
-    backgroundColor: "white",
-    cursor: "pointer",
-  } as React.CSSProperties,
-  hint: {
-    fontSize: "12px",
-    color: "#999",
-    margin: "4px 0 0 0",
-  } as React.CSSProperties,
-  errorText: {
-    fontSize: "14px",
-    color: "#d32f2f",
-    margin: "0",
-    padding: "8px",
-    backgroundColor: "#ffebee",
-    borderRadius: "4px",
-  } as React.CSSProperties,
-  buttonGroup: {
-    display: "flex",
-    gap: "12px",
-  } as React.CSSProperties,
-  backButton: {
-    flex: 1,
-    padding: "14px",
-    backgroundColor: "white",
-    color: "#666",
-    border: "1px solid #ddd",
-    borderRadius: "8px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  } as React.CSSProperties,
-  submitButton: {
-    flex: 2,
-    padding: "14px",
-    backgroundColor: "#34c759",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  } as React.CSSProperties,
-  submitButtonDisabled: {
-    backgroundColor: "#ccc",
-    cursor: "not-allowed",
-  } as React.CSSProperties,
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-  } as React.CSSProperties,
-  modalContent: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "32px",
-    maxWidth: "400px",
-    width: "90%",
-    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-  } as React.CSSProperties,
-  modalTitle: {
-    fontSize: "20px",
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: "16px",
-    textAlign: "center",
-  } as React.CSSProperties,
-  modalText: {
-    fontSize: "14px",
-    color: "#666",
-    marginBottom: "24px",
-    lineHeight: "1.6",
-    textAlign: "center",
-  } as React.CSSProperties,
-  groupIdBox: {
-    backgroundColor: "#f8f9fa",
-    border: "2px solid #007bff",
-    borderRadius: "8px",
-    padding: "16px",
-    marginBottom: "16px",
-  } as React.CSSProperties,
-  groupIdLabel: {
-    fontSize: "12px",
-    color: "#666",
-    marginBottom: "8px",
-    textAlign: "center",
-  } as React.CSSProperties,
-  groupIdValue: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#007bff",
-    textAlign: "center",
-    letterSpacing: "2px",
-    fontFamily: "monospace",
-  } as React.CSSProperties,
-  copyButton: {
-    width: "100%",
-    padding: "12px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    marginBottom: "12px",
-    transition: "background-color 0.2s",
-  } as React.CSSProperties,
-  modalCloseButton: {
-    width: "100%",
-    padding: "12px",
-    backgroundColor: "#34c759",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  } as React.CSSProperties,
 };
 
 export default CreateGroupPage;

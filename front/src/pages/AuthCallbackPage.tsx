@@ -92,10 +92,10 @@ const AuthCallbackPage = () => {
   // ローディング中の表示
   if (loading && !error) {
     return (
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>認証処理中...</p>
+      <div className="min-h-screen flex items-center justify-center bg-line-bg">
+        <div className="card max-w-md w-full mx-4 text-center">
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-line-green rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-base-readable text-gray-600">認証処理中...</p>
         </div>
       </div>
     );
@@ -104,19 +104,17 @@ const AuthCallbackPage = () => {
   // エラー時の表示
   if (error) {
     return (
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <h2 style={styles.errorTitle}>エラーが発生しました</h2>
-          <p style={styles.errorText}>{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-line-bg px-4">
+        <div className="card max-w-md w-full text-center">
+          <h2 className="text-xl md:text-2xl font-bold text-red-600 mb-4">
+            エラーが発生しました
+          </h2>
+          <p className="text-sm-readable text-gray-600 mb-6 leading-relaxed">
+            {error}
+          </p>
           <button
             onClick={() => navigate('/login')}
-            style={styles.retryButton}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#0056b3';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#007bff';
-            }}
+            className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-6 rounded-soft transition-colors duration-200 text-base-readable"
           >
             ログイン画面に戻る
           </button>
@@ -127,71 +125,5 @@ const AuthCallbackPage = () => {
 
   return null;
 };
-
-// スタイル定義
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-  } as React.CSSProperties,
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '40px',
-    maxWidth: '400px',
-    width: '100%',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  spinner: {
-    border: '4px solid #f3f3f3',
-    borderTop: '4px solid #06C755',
-    borderRadius: '50%',
-    width: '50px',
-    height: '50px',
-    animation: 'spin 1s linear infinite',
-    margin: '0 auto 20px',
-  } as React.CSSProperties,
-  loadingText: {
-    fontSize: '16px',
-    color: '#666',
-    margin: '0',
-  } as React.CSSProperties,
-  errorTitle: {
-    fontSize: '20px',
-    fontWeight: 'bold',
-    color: '#d32f2f',
-    marginBottom: '16px',
-  } as React.CSSProperties,
-  errorText: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '24px',
-    lineHeight: '1.6',
-  } as React.CSSProperties,
-  retryButton: {
-    padding: '12px 24px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  } as React.CSSProperties,
-};
-
-// スピナーアニメーション用のCSSを追加
-const styleSheet = document.styleSheets[0];
-styleSheet.insertRule(`
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`, styleSheet.cssRules.length);
 
 export default AuthCallbackPage;

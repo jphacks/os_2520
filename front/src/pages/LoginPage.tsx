@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import '../App.css';
 
 /**
  * ログイン画面コンポーネント
@@ -7,7 +6,7 @@ import '../App.css';
  * フロントエンド設計書に基づき、LINE認証を使用したログイン機能を提供します。
  * - アプリの概要説明を表示
  * - LINE公式アカウントの友達追加を促す説明
- * - LINEでログインボタン（bot_prompt=aggressiveを指定）
+ * - LINEでログインボタン(bot_prompt=aggressiveを指定)
  */
 const LoginPage = () => {
   // LINE Login設定
@@ -16,7 +15,7 @@ const LoginPage = () => {
   const STATE = Math.random().toString(36).substring(7); // CSRF対策用のstate
 
   useEffect(() => {
-    // stateをsessionStorageに保存（コールバック時の検証用）
+    // stateをsessionStorageに保存(コールバック時の検証用)
     sessionStorage.setItem('line_login_state', STATE);
   }, [STATE]);
 
@@ -40,150 +39,85 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
+    <div className="min-h-screen flex items-center justify-center bg-line-bg px-4 py-8">
+      <div className="card max-w-2xl w-full">
         {/* アプリロゴ・タイトル */}
-        <div style={styles.header}>
-          <h1 style={styles.title}>家族つながるクイズアプリ</h1>
-          <p style={styles.subtitle}>思い出クイズで安否確認</p>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+            家族つながるクイズアプリ
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600">
+            思い出クイズで安否確認
+          </p>
         </div>
 
         {/* アプリの概要説明 */}
-        <div style={styles.description}>
-          <h2 style={styles.sectionTitle}>アプリについて</h2>
-          <p style={styles.text}>
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <span className="mr-2">📱</span>
+            アプリについて
+          </h2>
+          <p className="text-base-readable text-gray-700 mb-4 leading-relaxed">
             このアプリは、祖父母が家族に向けてクイズを出題し、家族が楽しく回答することで、
             自然な形で安否確認ができるサービスです。
           </p>
-          <ul style={styles.featureList}>
-            <li>祖父母の思い出や経験をクイズにして共有</li>
-            <li>家族みんなで楽しみながら安否確認</li>
-            <li>クイズが出題されない場合は自動でアラート通知</li>
+          <ul className="space-y-2 text-base-readable text-gray-700">
+            <li className="flex items-start">
+              <span className="text-line-green mr-2 mt-1">✓</span>
+              <span>祖父母の思い出や経験をクイズにして共有</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-line-green mr-2 mt-1">✓</span>
+              <span>家族みんなで楽しみながら安否確認</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-line-green mr-2 mt-1">✓</span>
+              <span>クイズが出題されない場合は自動でアラート通知</span>
+            </li>
           </ul>
         </div>
 
         {/* LINE友達追加の説明 */}
-        <div style={styles.lineInfo}>
-          <h2 style={styles.sectionTitle}>LINE連携について</h2>
-          <p style={styles.text}>
+        <div className="bg-line-green-50 border-2 border-line-green-200 rounded-soft p-6 mb-8">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <span className="mr-2">🔔</span>
+            LINE連携について
+          </h2>
+          <p className="text-base-readable text-gray-700 mb-4 leading-relaxed">
             このアプリはLINE通知機能を使用します。
             ログイン時にLINE公式アカウントの友達追加をお願いします。
           </p>
-          <ul style={styles.featureList}>
-            <li>新しいクイズが出題されたときにLINEで通知</li>
-            <li>緊急通知をLINEで受け取り</li>
-            <li>クイズ未出題時のアラートをLINEで受け取り</li>
+          <ul className="space-y-2 text-base-readable text-gray-700">
+            <li className="flex items-start">
+              <span className="text-line-green mr-2 mt-1">✓</span>
+              <span>新しいクイズが出題されたときにLINEで通知</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-line-green mr-2 mt-1">✓</span>
+              <span>緊急通知をLINEで受け取り</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-line-green mr-2 mt-1">✓</span>
+              <span>クイズ未出題時のアラートをLINEで受け取り</span>
+            </li>
           </ul>
         </div>
 
         {/* LINEでログインボタン */}
         <button
           onClick={handleLineLogin}
-          style={styles.loginButton}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#00B900';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#06C755';
-          }}
+          className="w-full btn-primary py-4 text-lg md:text-xl mb-4"
         >
-          <span style={styles.buttonText}>LINEでログイン</span>
+          LINEでログイン
         </button>
 
         {/* 注意事項 */}
-        <p style={styles.note}>
+        <p className="text-sm text-gray-500 text-center">
           ログインすることで、利用規約とプライバシーポリシーに同意したものとみなします。
         </p>
       </div>
     </div>
   );
-};
-
-// スタイル定義
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  } as React.CSSProperties,
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '40px',
-    maxWidth: '600px',
-    width: '100%',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  } as React.CSSProperties,
-  header: {
-    textAlign: 'center',
-    marginBottom: '30px',
-  } as React.CSSProperties,
-  title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-  } as React.CSSProperties,
-  subtitle: {
-    fontSize: '16px',
-    color: '#666',
-    margin: '0',
-  } as React.CSSProperties,
-  description: {
-    marginBottom: '24px',
-  } as React.CSSProperties,
-  lineInfo: {
-    marginBottom: '32px',
-    backgroundColor: '#f8f9fa',
-    padding: '20px',
-    borderRadius: '8px',
-  } as React.CSSProperties,
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '12px',
-  } as React.CSSProperties,
-  text: {
-    fontSize: '14px',
-    color: '#555',
-    lineHeight: '1.6',
-    marginBottom: '12px',
-  } as React.CSSProperties,
-  featureList: {
-    fontSize: '14px',
-    color: '#555',
-    lineHeight: '1.8',
-    paddingLeft: '20px',
-    margin: '0',
-  } as React.CSSProperties,
-  loginButton: {
-    width: '100%',
-    padding: '16px',
-    backgroundColor: '#06C755',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    marginBottom: '16px',
-  } as React.CSSProperties,
-  buttonText: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as React.CSSProperties,
-  note: {
-    fontSize: '12px',
-    color: '#999',
-    textAlign: 'center',
-    margin: '0',
-  } as React.CSSProperties,
 };
 
 export default LoginPage;

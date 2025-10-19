@@ -98,43 +98,118 @@ function OldDashboard() {
   };
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>祖父母ダッシュボード</h2>
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={() => navigate("/old")} style={{ marginRight: 8 }}>
-          クイズを作成する
-        </button>
-        <button onClick={sendEmergency} style={{ background: "#e53935", color: "#fff" }}>
-          緊急通知を送る
-        </button>
-      </div>
+    <div className="min-h-screen bg-line-bg p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* ヘッダー */}
+        <div className="mb-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
+            祖父母ダッシュボード
+          </h2>
 
-      <section>
-        <h3>過去の出題一覧</h3>
-        {loading && <p>読み込み中...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {!loading && quizzes.length === 0 && <p>過去の出題はありません</p>}
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {quizzes.map((q) => (
-            <li key={q.id} style={{ borderBottom: "1px solid #eee", padding: "12px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, color: "#666" }}>{new Date(q.createdAt).toLocaleString()}</div>
-                  <div style={{ fontWeight: 600, marginTop: 6 }}>{q.question}</div>
-                  <div style={{ marginTop: 6, fontSize: 13, color: "#444" }}>
-                    正答率: {Math.round(q.correctRate)}% ・ 回答者 {q.answeredCount}/{q.totalCount}
+          {/* アクションボタン */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <button
+              onClick={() => navigate("/old")}
+              className="btn-primary text-xl sm:text-2xl py-5 font-extrabold shadow-lg flex-1"
+            >
+              📝 クイズを作成する
+            </button>
+            <button
+              onClick={sendEmergency}
+              className="btn-danger text-lg sm:text-xl py-4"
+            >
+              🚨 緊急通知を送る
+            </button>
+          </div>
+        </div>
+
+        {/* 過去の出題一覧 */}
+        <section className="card">
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
+            過去の出題一覧
+          </h3>
+
+          {/* ローディング状態 */}
+          {loading && (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-line-green border-t-transparent"></div>
+              <p className="mt-4 text-lg sm:text-xl text-gray-600">読み込み中...</p>
+            </div>
+          )}
+
+          {/* エラー状態 */}
+          {error && (
+            <div className="bg-red-50 border-2 border-red-400 rounded-soft p-6 mb-6">
+              <p className="text-lg sm:text-xl text-red-700 font-bold">{error}</p>
+            </div>
+          )}
+
+          {/* 空の状態 */}
+          {!loading && quizzes.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-xl sm:text-2xl text-gray-500">過去の出題はありません</p>
+              <p className="text-base sm:text-lg text-gray-400 mt-2">
+                クイズを作成して、家族に出題してみましょう！
+              </p>
+            </div>
+          )}
+
+          {/* クイズリスト */}
+          {!loading && quizzes.length > 0 && (
+            <ul className="space-y-4">
+              {quizzes.map((q) => (
+                <li key={q.id} className="card border-2 border-gray-200 hover:border-line-green transition-colors">
+                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="flex-1">
+                      {/* 作成日時 */}
+                      <div className="text-sm sm:text-base text-gray-500 mb-2">
+                        {new Date(q.createdAt).toLocaleString('ja-JP', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+
+                      {/* 質問文 */}
+                      <div className="text-lg sm:text-xl font-bold text-gray-800 mb-3">
+                        {q.question}
+                      </div>
+
+                      {/* 回答状況 */}
+                      <div className="flex flex-wrap gap-4 text-base sm:text-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-line-green">正答率:</span>
+                          <span className="text-gray-700 font-bold">
+                            {Math.round(q.correctRate)}%
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-600">回答者:</span>
+                          <span className="text-gray-700 font-bold">
+                            {q.answeredCount}/{q.totalCount}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 詳細ボタン */}
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => navigate(`/quiz/${q.id}`, { state: { quizId: q.id } })}
+                        className="btn-secondary text-base sm:text-lg py-3 px-6 whitespace-nowrap"
+                      >
+                        📊 詳細を見る
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <button onClick={() => navigate(`/quiz/${q.id}`, { state: { quizId: q.id } })}>
-                    詳細
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

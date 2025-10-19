@@ -123,83 +123,122 @@ const sendEmergency = async (): Promise<void> => {
 
 // ...existing code...
   return (
-    <div style={{ padding: 16 }}>
-      <h2>
-        {nickname}さん
-        <p>質問を作成して送信してください</p>
-      </h2>
-
-      {/* 未対応リクエスト表示 */}
-      {pendingRequest && (
-        <div style={{
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '8px',
-          padding: '16px',
-          marginBottom: '20px'
-        }}>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#856404' }}>
-            クイズリクエストが届いています!
-          </div>
-          <p style={{ margin: '8px 0', color: '#856404' }}>
-            {pendingRequest.requesterName}さんから
-            「<strong>{pendingRequest.content}</strong>」
-            のリクエストが届きました
-          </p>
-          <p style={{ fontSize: '12px', color: '#856404', margin: '0' }}>
-            このテーマでクイズを作成すると、自動的にリクエストに対応します
+    <div className="min-h-screen bg-line-bg p-4 sm:p-6">
+      <div className="max-w-3xl mx-auto">
+        {/* ヘッダー */}
+        <div className="mb-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+            {nickname}さん
+          </h2>
+          <p className="text-lg sm:text-xl text-gray-600">
+            質問を作成して送信してください
           </p>
         </div>
-      )}
 
-
-      <div style={{ marginBottom: 12 }}>
-        <label>質問（最大100文字）</label>
-        <br />
-        <textarea
-          placeholder="ここに質問を入力してください"
-          style={{ width: "100%", minHeight: 80, padding: 8 }}
-          value={question}
-          onChange={handleQuestionChange}
-          maxLength={100}
-        />
-        <div style={{ textAlign: "right" }}>{question.length}/100</div>
-      </div>
-
-      <div style={{ marginBottom: 12 }}>
-        <label style={{whiteSpace: "pre"}}>選択肢（4つ）  ※各最大20文字                                    答え</label>
-
-        <br />
-        {choices.map((c, i) => (
-          <div key={i} style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
-            <input
-              type="text"
-              placeholder={`選択肢 ${i + 1}`}
-              value={c}
-              onChange={(e) => handleChoiceChange(i, e)}
-              maxLength={50}
-              style={{ width: "65%", padding: 6 }}
-            />
-            <small style={{ width: 60, textAlign: "left" }}>{c.length}/20</small>
-            <input
-                type="radio"
-                name="correct"
-                checked={correctIndex === i}
-                onChange={() => setCorrectIndex(i)}
-                disabled={c.trim() === ""}
-                />
-                {` ${i + 1}`}
+        {/* 未対応リクエスト表示 */}
+        {pendingRequest && (
+          <div className="card bg-yellow-50 border-2 border-yellow-400 mb-6">
+            <div className="text-xl sm:text-2xl font-bold mb-3 text-yellow-800">
+              クイズリクエストが届いています!
+            </div>
+            <p className="text-base sm:text-lg text-yellow-800 mb-2">
+              {pendingRequest.requesterName}さんから
+              「<strong>{pendingRequest.content}</strong>」
+              のリクエストが届きました
+            </p>
+            <p className="text-sm sm:text-base text-yellow-700">
+              このテーマでクイズを作成すると、自動的にリクエストに対応します
+            </p>
           </div>
-        ))}
-        <br />
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={() => navigate("/")}>戻る</button>
-        <button onClick={() => navigate("/old/dashboard")}>ダッシュボードへ</button>
-        <button onClick={handleSend}>出題</button>
-        <button onClick={sendEmergency} style={{ background: "#e53935", color: "#fff" }}>
-          緊急通知を送る
-        </button>
+        )}
+
+        {/* 質問入力 */}
+        <div className="card mb-6">
+          <label className="block text-xl sm:text-2xl font-bold text-gray-800 mb-3">
+            質問（最大100文字）
+          </label>
+          <textarea
+            placeholder="ここに質問を入力してください"
+            className="textarea-field min-h-[120px] text-lg sm:text-xl"
+            value={question}
+            onChange={handleQuestionChange}
+            maxLength={100}
+          />
+          <div className="text-right text-base sm:text-lg text-gray-600 mt-2">
+            {question.length}/100
+          </div>
+        </div>
+
+        {/* 選択肢入力 */}
+        <div className="card mb-6">
+          <label className="block text-xl sm:text-2xl font-bold text-gray-800 mb-3">
+            選択肢（4つ） ※各最大20文字
+          </label>
+          <div className="space-y-4">
+            {choices.map((c, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder={`選択肢 ${i + 1}`}
+                    value={c}
+                    onChange={(e) => handleChoiceChange(i, e)}
+                    maxLength={20}
+                    className="input-field text-lg sm:text-xl"
+                  />
+                  <div className="text-sm sm:text-base text-gray-600 mt-1 text-right">
+                    {c.length}/20
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 min-w-[80px]">
+                  <input
+                    type="radio"
+                    name="correct"
+                    checked={correctIndex === i}
+                    onChange={() => setCorrectIndex(i)}
+                    disabled={c.trim() === ""}
+                    className="w-6 h-6 cursor-pointer disabled:cursor-not-allowed"
+                    id={`correct-${i}`}
+                  />
+                  <label
+                    htmlFor={`correct-${i}`}
+                    className="text-lg sm:text-xl font-bold text-gray-700 cursor-pointer"
+                  >
+                    答え
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ボタングループ */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <button
+            onClick={() => navigate("/")}
+            className="btn-secondary text-lg sm:text-xl py-4"
+          >
+            戻る
+          </button>
+          <button
+            onClick={() => navigate("/old/dashboard")}
+            className="btn-secondary text-lg sm:text-xl py-4"
+          >
+            ダッシュボードへ
+          </button>
+          <button
+            onClick={handleSend}
+            className="btn-primary text-xl sm:text-2xl py-5 font-extrabold shadow-lg"
+          >
+            📝 出題する
+          </button>
+          <button
+            onClick={sendEmergency}
+            className="btn-danger text-lg sm:text-xl py-4"
+          >
+            🚨 緊急通知を送る
+          </button>
+        </div>
       </div>
     </div>
   );

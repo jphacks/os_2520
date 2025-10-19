@@ -100,122 +100,133 @@ function YangPage() {
 
   if (!quiz) {
     return (
-      <div style={{ textAlign: "center", marginTop: "100px" }}>
-        <p>クイズは出題されていません</p>
-        <button onClick={() => navigate("/")} style={{ marginTop: "20px" }}>
-          戻る
-        </button>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="card text-center max-w-md">
+          <p className="text-base-readable mb-4">クイズは出題されていません</p>
+          <button onClick={() => navigate("/")} className="btn-primary w-full">
+            戻る
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px", maxWidth: "400px", margin: "50px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
-      <h2>{nickname}さん</h2>
-
-      {/* ポイント表示 */}
-      <div style={{ backgroundColor: "#f0f8ff", padding: "12px", borderRadius: "8px", marginBottom: "16px" }}>
-        <span style={{ fontSize: "14px", color: "#666" }}>あなたのポイント: </span>
-        <span style={{ fontSize: "24px", fontWeight: "bold", color: "#4169E1" }}>{user?.points ?? 0} P</span>
-      </div>
-
-      {/* リクエストボタン */}
-      {(user?.points ?? 0) >= 10 && (
-        <button
-          onClick={() => navigate('/request')}
-          style={{
-            width: "100%",
-            padding: "12px",
-            backgroundColor: "#32CD32",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            marginBottom: "16px"
-          }}
-        >
-          リクエストする (10P)
-        </button>
-      )}
-
-      <h3>質問に答えてね</h3>
-
-      <div style={{ textAlign: "left", marginBottom: "20px", padding: "15px", border: "1px solid #eee", borderRadius: "5px" }}>
-        <h4>クイズ本文</h4>
-        <p style={{ fontWeight: "bold" }}>{quiz.question}</p>
-      </div>
-
-      {/* 選択肢 (ラジオボタン) */}
-      <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <h4 style={{ marginBottom: "10px" }}>選択肢</h4>
-        {quiz.choices.map((choice) => (
-          <div key={choice.id} style={{ marginBottom: "8px" }}>
-            <label>
-              <input
-                type="radio"
-                name="quiz-answer"
-                value={choice.id}
-                checked={selectedOptionId === choice.id}
-                onChange={() => setSelectedOptionId(choice.id)}
-                style={{ marginRight: "8px" }}
-                disabled={isLoading}
-              />
-              {choice.text}
-            </label>
+    <div className="min-h-screen bg-line-bg py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="card">
+          {/* ヘッダー */}
+          <div className="text-center mb-6">
+            <h2 className="text-xl-readable font-bold text-gray-800">{nickname}さん</h2>
           </div>
-        ))}
+
+          {/* ポイント表示 */}
+          <div className="bg-line-green-50 rounded-soft p-4 mb-6 text-center border-2 border-line-green-200">
+            <span className="text-sm-readable text-gray-600 block mb-1">あなたのポイント</span>
+            <span className="text-4xl font-bold text-line-green">{user?.points ?? 0} P</span>
+          </div>
+
+          {/* リクエストボタン */}
+          {(user?.points ?? 0) >= 10 && (
+            <button
+              onClick={() => navigate('/request')}
+              className="btn-primary w-full mb-6"
+            >
+              リクエストする (10P)
+            </button>
+          )}
+
+          <h3 className="text-lg-readable font-bold text-center mb-6 text-gray-700">質問に答えてね</h3>
+
+          {/* クイズ本文 */}
+          <div className="bg-line-green-50 rounded-soft p-5 mb-6 border-l-4 border-line-green">
+            <h4 className="text-base-readable font-semibold text-gray-700 mb-2">クイズ本文</h4>
+            <p className="text-base-readable font-bold text-gray-900">{quiz.question}</p>
+          </div>
+
+          {/* 選択肢 (ラジオボタン) */}
+          <div className="mb-6">
+            <h4 className="text-base-readable font-semibold text-gray-700 mb-3">選択肢</h4>
+            <div className="space-y-3">
+              {quiz.choices.map((choice) => (
+                <div key={choice.id} className="bg-white border-2 border-gray-200 rounded-soft p-4 hover:border-line-green transition-colors">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="quiz-answer"
+                      value={choice.id}
+                      checked={selectedOptionId === choice.id}
+                      onChange={() => setSelectedOptionId(choice.id)}
+                      className="w-5 h-5 text-line-green focus:ring-line-green focus:ring-2 mr-3"
+                      disabled={isLoading}
+                    />
+                    <span className="text-base-readable text-gray-800">{choice.text}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* メッセージ (任意) */}
+          <div className="mb-6">
+            <label htmlFor="message" className="block text-base-readable font-semibold text-gray-700 mb-2">
+              メッセージ (任意)
+            </label>
+            <textarea
+              id="message"
+              rows={3}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="面白いクイズだね！"
+              className="textarea-field"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* エラーメッセージ */}
+          {error && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-soft p-4 mb-4">
+              <p className="text-base-readable text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* 回答結果メッセージ */}
+          {response && (
+            <div className={`rounded-soft p-4 mb-4 border-2 ${response.isCorrect ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
+              <p className={`text-base-readable font-bold ${response.isCorrect ? 'text-green-700' : 'text-orange-700'}`}>
+                回答済み: {response.isCorrect ? "正解！" : "残念！不正解です"}
+              </p>
+            </div>
+          )}
+
+          {/* 回答ボタン */}
+          <button
+            onClick={handleAnswerSubmit}
+            disabled={isLoading || !selectedOptionId}
+            className="btn-primary w-full mb-3"
+          >
+            {isLoading ? "回答中..." : "回答"}
+          </button>
+
+          {/* ナビゲーションボタン */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => navigate("/")}
+              disabled={isLoading}
+              className="btn-secondary"
+            >
+              戻る
+            </button>
+            <button
+              onClick={() => navigate("/yang/dashboard")}
+              disabled={isLoading}
+              className="btn-secondary"
+            >
+              ダッシュボードへ
+            </button>
+          </div>
+        </div>
       </div>
-
-      {/* メッセージ (任意) */}
-      <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <label htmlFor="message" style={{ display: "block", marginBottom: "5px" }}>
-          メッセージ (任意)
-        </label>
-        <textarea
-          id="message"
-          rows={3}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="面白いクイズだね！"
-          style={{ width: "100%", padding: "8px", border: "1px solid #ccc" }}
-          disabled={isLoading}
-        />
-      </div>
-
-      {error && <p style={{ color: "red", marginBottom: "10px" }}>{error}</p>}
-      {response && (
-        <p style={{ color: response.isCorrect ? "green" : "orange", marginBottom: "10px", fontWeight: "bold" }}>
-          回答済み: {response.isCorrect ? "正解！" : "残念！不正解です"}
-        </p>
-      )}
-
-      {/* 回答ボタン */}
-      <button
-        onClick={handleAnswerSubmit}
-        disabled={isLoading || !selectedOptionId}
-        style={{
-          width: "100%",
-          padding: "10px",
-          backgroundColor: isLoading || !selectedOptionId ? "#cccccc" : "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: isLoading || !selectedOptionId ? "not-allowed" : "pointer",
-          fontWeight: "bold",
-          marginBottom: "10px"
-        }}
-      >
-        {isLoading ? "回答中..." : "回答"}
-      </button>
-
-      <button onClick={() => navigate("/")} disabled={isLoading} style={{ width: "100%", padding: "8px", backgroundColor: "#6c757d", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
-        戻る
-      </button>
-      {/* 追加: ダッシュボードへ直接移動するボタン */}
-      <button onClick={() => navigate("/yang/dashboard")} disabled={isLoading} style={{ width: "100%", padding: "8px", marginTop: 8 }}>
-        ダッシュボードへ
-      </button>
     </div>
   );
 }

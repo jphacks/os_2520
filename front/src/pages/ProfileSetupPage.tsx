@@ -60,52 +60,74 @@ const ProfileSetupPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>ユーザー情報入力</h1>
-        <p style={styles.subtitle}>
+    <div className="min-h-screen flex items-center justify-center bg-line-bg px-4 py-8">
+      <div className="card max-w-lg w-full">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">
+          ユーザー情報入力
+        </h1>
+        <p className="text-base text-gray-600 mb-8 text-center">
           あなたの役割と氏名を入力してください
         </p>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* 役割選択 */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>役割を選択 *</label>
-            <div style={styles.radioGroup}>
-              <label style={styles.radioLabel}>
+          <div>
+            <label className="block text-base-readable font-bold text-gray-800 mb-3">
+              役割を選択 *
+            </label>
+            <div className="grid grid-cols-2 gap-4 mb-2">
+              <label
+                className={`
+                  flex items-center justify-center p-4 rounded-soft border-2 cursor-pointer transition-all
+                  ${role === 'grandparent'
+                    ? 'border-line-green bg-line-green-50 text-line-green-700'
+                    : 'border-gray-300 bg-white hover:border-line-green-300'
+                  }
+                `}
+              >
                 <input
                   type="radio"
                   name="role"
                   value="grandparent"
                   checked={role === 'grandparent'}
                   onChange={(e) => setRole(e.target.value as 'grandparent' | 'family')}
-                  style={styles.radio}
+                  className="sr-only"
                 />
-                <span style={styles.radioText}>祖父母</span>
+                <span className="text-3xl mr-2">👴👵</span>
+                <span className="text-base-readable font-bold">祖父母</span>
               </label>
-              <label style={styles.radioLabel}>
+              <label
+                className={`
+                  flex items-center justify-center p-4 rounded-soft border-2 cursor-pointer transition-all
+                  ${role === 'family'
+                    ? 'border-line-green bg-line-green-50 text-line-green-700'
+                    : 'border-gray-300 bg-white hover:border-line-green-300'
+                  }
+                `}
+              >
                 <input
                   type="radio"
                   name="role"
                   value="family"
                   checked={role === 'family'}
                   onChange={(e) => setRole(e.target.value as 'grandparent' | 'family')}
-                  style={styles.radio}
+                  className="sr-only"
                 />
-                <span style={styles.radioText}>子・孫</span>
+                <span className="text-3xl mr-2">👨👩</span>
+                <span className="text-base-readable font-bold">子・孫</span>
               </label>
             </div>
-            <p style={styles.hint}>
+            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-soft">
               {role === 'grandparent'
-                ? 'クイズを出題する側として登録します'
-                : 'クイズに回答する側として登録します'}
+                ? '✓ クイズを出題する側として登録します'
+                : '✓ クイズに回答する側として登録します'}
             </p>
           </div>
 
           {/* 氏名入力 */}
-          <div style={styles.formGroup}>
-            <label htmlFor="displayName" style={styles.label}>
-              氏名（アプリ内表示名） *
+          <div>
+            <label htmlFor="displayName" className="block text-base-readable font-bold text-gray-800 mb-2">
+              氏名(アプリ内表示名) *
             </label>
             <input
               id="displayName"
@@ -114,33 +136,24 @@ const ProfileSetupPage = () => {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="例: 山田太郎"
               maxLength={20}
-              style={styles.input}
+              className="input-field"
               disabled={loading}
             />
-            <p style={styles.hint}>最大20文字</p>
+            <p className="text-sm text-gray-500 mt-1">最大20文字</p>
           </div>
 
           {/* エラーメッセージ */}
-          {error && <p style={styles.errorText}>{error}</p>}
+          {error && (
+            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-soft">
+              {error}
+            </div>
+          )}
 
           {/* 次へボタン */}
           <button
             type="submit"
             disabled={loading}
-            style={{
-              ...styles.submitButton,
-              ...(loading ? styles.submitButtonDisabled : {}),
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = '#0056b3';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = '#007bff';
-              }
-            }}
+            className="w-full btn-primary py-4 text-lg"
           >
             {loading ? '登録中...' : '次へ'}
           </button>
@@ -148,108 +161,6 @@ const ProfileSetupPage = () => {
       </div>
     </div>
   );
-};
-
-// スタイル定義
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  } as React.CSSProperties,
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '40px',
-    maxWidth: '500px',
-    width: '100%',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  } as React.CSSProperties,
-  title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  subtitle: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '32px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  } as React.CSSProperties,
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-  } as React.CSSProperties,
-  label: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-  } as React.CSSProperties,
-  radioGroup: {
-    display: 'flex',
-    gap: '16px',
-    marginBottom: '8px',
-  } as React.CSSProperties,
-  radioLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-  radio: {
-    marginRight: '6px',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-  radioText: {
-    fontSize: '14px',
-    color: '#333',
-  } as React.CSSProperties,
-  input: {
-    padding: '12px',
-    fontSize: '14px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-  } as React.CSSProperties,
-  hint: {
-    fontSize: '12px',
-    color: '#999',
-    margin: '4px 0 0 0',
-  } as React.CSSProperties,
-  errorText: {
-    fontSize: '14px',
-    color: '#d32f2f',
-    margin: '0',
-    padding: '8px',
-    backgroundColor: '#ffebee',
-    borderRadius: '4px',
-  } as React.CSSProperties,
-  submitButton: {
-    padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  } as React.CSSProperties,
-  submitButtonDisabled: {
-    backgroundColor: '#ccc',
-    cursor: 'not-allowed',
-  } as React.CSSProperties,
 };
 
 export default ProfileSetupPage;

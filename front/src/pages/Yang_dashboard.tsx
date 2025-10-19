@@ -145,71 +145,137 @@ export default function YangDashboard() {
   };
 
   return (
-    <div style={{ padding: 16, maxWidth: 900, margin: "0 auto" }}>
-      <h2>子・孫ダッシュボード</h2>
-      {loading && <p>読み込み中...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+    <div className="min-h-screen bg-line-bg py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* ヘッダー */}
+        <div className="mb-8">
+          <h2 className="text-xl-readable font-bold text-gray-800 text-center">子・孫ダッシュボード</h2>
+        </div>
 
-      <section style={{ marginTop: 12 }}>
-        <h3>未回答のクイズ ({pending.length})</h3>
-        {pending.length === 0 ? (
-          <p>未回答クイズはありません</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {pending.map((q) => (
-              <li key={q.quizId} style={{ borderBottom: "1px solid #eee", padding: "10px 0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, color: "#666" }}>{new Date(q.createdAt).toLocaleString()}</div>
-                    <div style={{ fontWeight: 600, marginTop: 6 }}>{q.question}</div>
-                  </div>
-                  <div>
-                    <button onClick={() => goToQuiz(q)}>回答する</button>
+        {/* ローディング・エラー表示 */}
+        {loading && (
+          <div className="card text-center">
+            <p className="text-base-readable text-gray-600">読み込み中...</p>
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-soft p-4 mb-6">
+            <p className="text-base-readable text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* 未回答のクイズセクション */}
+        <section className="mb-8">
+          <h3 className="text-lg-readable font-bold text-gray-800 mb-4">
+            未回答のクイズ ({pending.length})
+          </h3>
+          {pending.length === 0 ? (
+            <div className="card text-center">
+              <p className="text-base-readable text-gray-600">未回答クイズはありません</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pending.map((q) => (
+                <div key={q.quizId} className="card hover:shadow-lg transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="text-xs-readable text-gray-500 mb-2">
+                        {new Date(q.createdAt).toLocaleString('ja-JP')}
+                      </div>
+                      <div className="text-base-readable font-semibold text-gray-900">
+                        {q.question}
+                      </div>
+                    </div>
+                    <div className="sm:flex-shrink-0">
+                      <button
+                        onClick={() => goToQuiz(q)}
+                        className="btn-primary w-full sm:w-auto"
+                      >
+                        回答する
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <section style={{ marginTop: 20 }}>
-        <h3>回答履歴</h3>
-        {history.length === 0 ? (
-          <p>履歴がありません</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {history.map((h) => (
-              <li key={h.id} style={{ borderBottom: "1px solid #f0f0f0", padding: "8px 0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{h.question}</div>
-                    <div style={{ fontSize: 13, color: "#666" }}>{new Date(h.answeredAt).toLocaleString()}</div>
-                  </div>
-                  <div style={{ alignSelf: "center", color: h.isCorrect ? "green" : "orange" }}>
-                    {h.isCorrect ? "正解" : "不正解"}
+        {/* 回答履歴セクション */}
+        <section className="mb-8">
+          <h3 className="text-lg-readable font-bold text-gray-800 mb-4">回答履歴</h3>
+          {history.length === 0 ? (
+            <div className="card text-center">
+              <p className="text-base-readable text-gray-600">履歴がありません</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {history.map((h) => (
+                <div key={h.id} className="card bg-white">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="text-base-readable font-semibold text-gray-900 mb-1">
+                        {h.question}
+                      </div>
+                      <div className="text-xs-readable text-gray-500">
+                        {new Date(h.answeredAt).toLocaleString('ja-JP')}
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm-readable font-bold ${
+                          h.isCorrect
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-orange-100 text-orange-700'
+                        }`}
+                      >
+                        {h.isCorrect ? '正解' : '不正解'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <section style={{ marginTop: 20 }}>
-        <h3>メンバー正答率ランキング</h3>
-        {members.length === 0 ? (
-          <p>データがありません</p>
-        ) : (
-          <ol>
-            {members.map((m) => (
-              <li key={m.id} style={{ marginBottom: 6 }}>
-                {m.name} — 正答率: {Math.round(m.correctRate)}%
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+        {/* メンバー正答率ランキングセクション */}
+        <section className="mb-8">
+          <h3 className="text-lg-readable font-bold text-gray-800 mb-4">
+            メンバー正答率ランキング
+          </h3>
+          {members.length === 0 ? (
+            <div className="card text-center">
+              <p className="text-base-readable text-gray-600">データがありません</p>
+            </div>
+          ) : (
+            <div className="card">
+              <ol className="space-y-3">
+                {members.map((m, index) => (
+                  <li key={m.id} className="flex items-center justify-between p-3 bg-line-bg rounded-soft">
+                    <div className="flex items-center gap-3">
+                      <span className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm-readable ${
+                        index === 0 ? 'bg-yellow-400 text-yellow-900' :
+                        index === 1 ? 'bg-gray-300 text-gray-700' :
+                        index === 2 ? 'bg-orange-300 text-orange-900' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {index + 1}
+                      </span>
+                      <span className="text-base-readable font-semibold text-gray-800">
+                        {m.name}
+                      </span>
+                    </div>
+                    <span className="text-lg-readable font-bold text-line-green">
+                      {Math.round(m.correctRate)}%
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
