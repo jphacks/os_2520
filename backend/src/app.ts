@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import router from './routes/index';
 import prisma from './prismaClient';
 import { initQuizAlertCron } from './jobs/quizAlertCron';
@@ -17,10 +18,24 @@ app.use(cors({
 // ミドルウェア設定
 app.use(express.json());
 app.use(cookieParser());  // Cookieをパースするミドルウェア
+
+// 静的ファイルの配信（本番環境）
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../front/dist')));
+}
+
 app.use('/', router);
 
-const server = app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+// 本番環境では全てのルートでReactアプリを配信
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../front/dist/index.html'));
+  });
+}
+
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 
   // cronジョブの初期化
   try {
