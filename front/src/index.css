@@ -1,68 +1,71 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* Tailwind CSSのディレクティブ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+/* 全体のベーススタイル */
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif;
   }
-  a:hover {
-    color: #747bff;
+
+  body {
+    @apply m-0 min-h-screen bg-line-bg text-gray-800;
   }
-  button {
-    background-color: #f9f9f9;
+
+  /* 高齢者向けに少し大きめのデフォルトフォントサイズ */
+  html {
+    font-size: 16px;
+  }
+}
+
+/* カスタムコンポーネント */
+@layer components {
+  /* プライマリボタン - LINEグリーンベース */
+  .btn-primary {
+    @apply px-6 py-3 bg-line-green text-white font-bold rounded-soft
+           hover:bg-line-green-600 active:bg-line-green-700
+           transition-colors duration-200
+           disabled:bg-gray-300 disabled:cursor-not-allowed
+           text-base-readable;
+  }
+
+  /* セカンダリボタン */
+  .btn-secondary {
+    @apply px-6 py-3 bg-white text-gray-700 font-bold rounded-soft
+           border-2 border-line-green
+           hover:bg-line-green-50 active:bg-line-green-100
+           transition-colors duration-200
+           disabled:bg-gray-100 disabled:border-gray-300 disabled:cursor-not-allowed
+           text-base-readable;
+  }
+
+  /* 危険なアクション用ボタン(緊急通知等) */
+  .btn-danger {
+    @apply px-6 py-3 bg-red-500 text-white font-bold rounded-soft
+           hover:bg-red-600 active:bg-red-700
+           transition-colors duration-200
+           text-base-readable;
+  }
+
+  /* カード */
+  .card {
+    @apply bg-white rounded-soft shadow-md p-6;
+  }
+
+  /* インプットフィールド */
+  .input-field {
+    @apply w-full px-4 py-3 border-2 border-gray-300 rounded-soft
+           focus:outline-none focus:border-line-green focus:ring-2 focus:ring-line-green-100
+           text-base-readable
+           disabled:bg-gray-100 disabled:cursor-not-allowed;
+  }
+
+  /* テキストエリア */
+  .textarea-field {
+    @apply w-full px-4 py-3 border-2 border-gray-300 rounded-soft
+           focus:outline-none focus:border-line-green focus:ring-2 focus:ring-line-green-100
+           text-base-readable resize-y
+           disabled:bg-gray-100 disabled:cursor-not-allowed;
   }
 }

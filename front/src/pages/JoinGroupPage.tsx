@@ -88,17 +88,22 @@ const JoinGroupPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>既存グループに参加</h1>
-        <p style={styles.subtitle}>
+    <div className="min-h-screen flex items-center justify-center bg-line-bg px-4 py-8">
+      <div className="card max-w-2xl w-full">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center">
+          既存グループに参加
+        </h1>
+        <p className="text-sm md:text-base text-gray-600 mb-8 text-center">
           招待されたグループIDとパスワードを入力してください
         </p>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           {/* グループID */}
-          <div style={styles.formGroup}>
-            <label htmlFor="groupId" style={styles.label}>
+          <div className="flex flex-col">
+            <label
+              htmlFor="groupId"
+              className="text-sm-readable font-bold text-gray-800 mb-2"
+            >
               招待されたグループID *
             </label>
             <input
@@ -108,18 +113,20 @@ const JoinGroupPage = () => {
               onChange={handleGroupIdChange}
               placeholder="例: A1B2C3D4"
               maxLength={8}
-              style={{
-                ...styles.input,
-                ...styles.groupIdInput,
-              }}
+              className="input-field font-mono text-lg tracking-wider text-center font-bold"
               disabled={loading}
             />
-            <p style={styles.hint}>英数字8文字（自動的に大文字に変換されます）</p>
+            <p className="text-xs text-gray-500 mt-1">
+              英数字8文字（自動的に大文字に変換されます）
+            </p>
           </div>
 
           {/* パスワード */}
-          <div style={styles.formGroup}>
-            <label htmlFor="password" style={styles.label}>
+          <div className="flex flex-col">
+            <label
+              htmlFor="password"
+              className="text-sm-readable font-bold text-gray-800 mb-2"
+            >
               パスワード *
             </label>
             <input
@@ -130,16 +137,18 @@ const JoinGroupPage = () => {
               placeholder="グループのパスワードを入力"
               minLength={8}
               maxLength={36}
-              style={styles.input}
+              className="input-field"
               disabled={loading}
             />
-            <p style={styles.hint}>最低8文字、最長36文字</p>
+            <p className="text-xs text-gray-500 mt-1">最低8文字、最長36文字</p>
           </div>
 
           {/* 情報ボックス */}
-          <div style={styles.infoBox}>
-            <p style={styles.infoTitle}>💡 グループIDの確認方法</p>
-            <p style={styles.infoContent}>
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-soft p-4">
+            <p className="text-sm-readable font-bold text-blue-700 mb-2">
+              💡 グループIDの確認方法
+            </p>
+            <p className="text-sm text-blue-600 leading-relaxed">
               グループIDは、グループを作成した代表者から共有されます。
               <br />
               LINEなどで送られた8文字のIDを入力してください。
@@ -147,35 +156,26 @@ const JoinGroupPage = () => {
           </div>
 
           {/* エラーメッセージ */}
-          {error && <p style={styles.errorText}>{error}</p>}
+          {error && (
+            <p className="text-sm-readable text-red-700 bg-red-50 p-3 rounded-soft border border-red-200">
+              {error}
+            </p>
+          )}
 
           {/* ボタングループ */}
-          <div style={styles.buttonGroup}>
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={() => navigate('/group-setup')}
               disabled={loading}
-              style={styles.backButton}
+              className="flex-1 btn-secondary"
             >
               戻る
             </button>
             <button
               type="submit"
               disabled={loading}
-              style={{
-                ...styles.submitButton,
-                ...(loading ? styles.submitButtonDisabled : {}),
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = '#0056b3';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = '#007bff';
-                }
-              }}
+              className="flex-[2] btn-primary"
             >
               {loading ? '参加中...' : 'グループに参加する'}
             </button>
@@ -184,133 +184,6 @@ const JoinGroupPage = () => {
       </div>
     </div>
   );
-};
-
-// スタイル定義
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  } as React.CSSProperties,
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '40px',
-    maxWidth: '500px',
-    width: '100%',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  } as React.CSSProperties,
-  title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  subtitle: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '32px',
-    textAlign: 'center',
-  } as React.CSSProperties,
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  } as React.CSSProperties,
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-  } as React.CSSProperties,
-  label: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '8px',
-  } as React.CSSProperties,
-  input: {
-    padding: '12px',
-    fontSize: '14px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-  } as React.CSSProperties,
-  groupIdInput: {
-    fontFamily: 'monospace',
-    fontSize: '18px',
-    letterSpacing: '2px',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  } as React.CSSProperties,
-  hint: {
-    fontSize: '12px',
-    color: '#999',
-    margin: '4px 0 0 0',
-  } as React.CSSProperties,
-  infoBox: {
-    backgroundColor: '#e3f2fd',
-    borderRadius: '8px',
-    padding: '16px',
-    border: '1px solid #90caf9',
-  } as React.CSSProperties,
-  infoTitle: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#1976d2',
-    marginBottom: '8px',
-    margin: '0 0 8px 0',
-  } as React.CSSProperties,
-  infoContent: {
-    fontSize: '13px',
-    color: '#1565c0',
-    lineHeight: '1.6',
-    margin: '0',
-  } as React.CSSProperties,
-  errorText: {
-    fontSize: '14px',
-    color: '#d32f2f',
-    margin: '0',
-    padding: '8px',
-    backgroundColor: '#ffebee',
-    borderRadius: '4px',
-  } as React.CSSProperties,
-  buttonGroup: {
-    display: 'flex',
-    gap: '12px',
-  } as React.CSSProperties,
-  backButton: {
-    flex: 1,
-    padding: '14px',
-    backgroundColor: 'white',
-    color: '#666',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  } as React.CSSProperties,
-  submitButton: {
-    flex: 2,
-    padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  } as React.CSSProperties,
-  submitButtonDisabled: {
-    backgroundColor: '#ccc',
-    cursor: 'not-allowed',
-  } as React.CSSProperties,
 };
 
 export default JoinGroupPage;
