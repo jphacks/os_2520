@@ -1,6 +1,7 @@
 // ...existing code...
 import { useLocation, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import apiClient from "../lib/axios";
 
 function OldPage() {
   const location = useLocation();
@@ -10,6 +11,22 @@ function OldPage() {
   const [question, setQuestion] = useState("");
   const [choices, setChoices] = useState<string[]>(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState<number | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<any | null>(null);
+
+  // 未対応のクイズリクエストを取得
+  useEffect(() => {
+    const fetchPendingRequest = async () => {
+      try {
+        const response = await apiClient.get('/requests/pending');
+        if (response.data.requests && response.data.requests.length > 0) {
+          setPendingRequest(response.data.requests[0]);
+        }
+      } catch (error) {
+        console.error('リクエスト取得エラー:', error);
+      }
+    };
+    fetchPendingRequest();
+  }, []);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setQuestion(e.target.value.slice(0, 100));
@@ -91,6 +108,30 @@ const handleSend = async () => {
         {nickname}さん
         <p>質問を作成して送信してください</p>
       </h2>
+
+      {/* 未対応リクエスト表示 */}
+      {pendingRequest && (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '20px'
+        }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px', color: '#856404' }}>
+            クイズリクエストが届いています!
+          </div>
+          <p style={{ margin: '8px 0', color: '#856404' }}>
+            {pendingRequest.requesterName}さんから
+            「<strong>{pendingRequest.content}</strong>」
+            のリクエストが届きました
+          </p>
+          <p style={{ fontSize: '12px', color: '#856404', margin: '0' }}>
+            このテーマでクイズを作成すると、自動的にリクエストに対応します
+          </p>
+        </div>
+      )}
+
 
       <div style={{ marginBottom: 12 }}>
         <label>質問（最大100文字）</label>

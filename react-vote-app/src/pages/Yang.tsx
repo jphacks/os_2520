@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios"; // API通信のためにaxiosをインポート
+import { useAuth } from "../contexts/AuthContext";
 
 // APIのベースURLとエンドポイント
 const API_BASE_URL = "https://api.example.com"; // 実際のAPIのURLに置き換えてください
@@ -29,6 +30,7 @@ interface LocationState {
 function YangPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // 1. location.stateからデータ取得
   const state = location.state as LocationState;
@@ -119,6 +121,33 @@ function YangPage() {
   return (
     <div style={{ textAlign: "center", marginTop: "50px", maxWidth: "400px", margin: "50px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
       <h2>{nickname}さん</h2>
+
+      {/* ポイント表示 */}
+      <div style={{ backgroundColor: "#f0f8ff", padding: "12px", borderRadius: "8px", marginBottom: "16px" }}>
+        <span style={{ fontSize: "14px", color: "#666" }}>あなたのポイント: </span>
+        <span style={{ fontSize: "24px", fontWeight: "bold", color: "#4169E1" }}>{user?.points ?? 0} P</span>
+      </div>
+
+      {/* リクエストボタン */}
+      {(user?.points ?? 0) >= 10 && (
+        <button
+          onClick={() => navigate('/request')}
+          style={{
+            width: "100%",
+            padding: "12px",
+            backgroundColor: "#32CD32",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginBottom: "16px"
+          }}
+        >
+          リクエストする (10P)
+        </button>
+      )}
+
       <h3>質問に答えてね</h3>
 
       <div style={{ textAlign: "left", marginBottom: "20px", padding: "15px", border: "1px solid #eee", borderRadius: "5px" }}>

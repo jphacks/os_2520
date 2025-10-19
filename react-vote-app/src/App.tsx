@@ -12,6 +12,7 @@ import GroupSetupPage from "./pages/GroupSetupPage.tsx";
 import CreateGroupPage from "./pages/CreateGroupPage.tsx";
 import JoinGroupPage from "./pages/JoinGroupPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
+import RequestPage from "./pages/RequestPage.tsx";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/old" element={<Old />} />
           <Route path="/old/dashboard" element={<OldDashboard />} />
           <Route path="/yang" element={<Yang />} />
+          <Route path="/request" element={<RequestPage />} />
 
           {/* 既存のルート（後で整理予定） */}
           <Route path="/" element={<SelectPage1 />} />

@@ -11,6 +11,7 @@ interface User {
   lineId: string;
   hasGroup: boolean; // グループに所属しているか
   groupId: string | null; // 所属しているグループのID
+  points: number; // ポイント残高
 }
 
 /**

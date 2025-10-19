@@ -8,6 +8,9 @@ export const createAuthRepository = (userRepo?: {
   findByLineId: (lineId: string) => Promise<any | null>;
   createUser: (data: { lineId: string; displayName: string; role: string }) => Promise<any>;
   updateUserProfile: (userId: string, data: { displayName?: string; role?: string }) => Promise<any>;
+  getUserById: (userId: string) => Promise<any | null>;
+  getUserGroupMembership: (userId: string) => Promise<any | null>;
+  updateUserPoints: (userId: string, points: number) => Promise<any>;
 }) => {
   const backing =
     userRepo ??
@@ -17,6 +20,16 @@ export const createAuthRepository = (userRepo?: {
         createUser: (data: { lineId: string; displayName: string; role: string }) => prisma.user.create({ data }),
         updateUserProfile: (userId: string, data: { displayName?: string; role?: string }) =>
           prisma.user.update({ where: { id: userId }, data: { displayName: data.displayName, role: data.role } }),
+        getUserById: (userId: string) => prisma.user.findUnique({ where: { id: userId } }),
+        getUserGroupMembership: (userId: string) =>
+          prisma.groupMember.findFirst({
+            where: { userId },
+            include: {
+              group: true,
+            },
+          }),
+        updateUserPoints: (userId: string, points: number) =>
+          prisma.user.update({ where: { id: userId }, data: { points } }),
       };
     })();
 
@@ -37,5 +50,27 @@ export const createAuthRepository = (userRepo?: {
     return impl.updateUserProfile(userId, data);
   };
 
-  return { findUserByLineId, createUser, updateUserProfile } as const;
+  const getUserById = async (userId: string) => {
+    const impl = await getBacking();
+    return impl.getUserById(userId);
+  };
+
+  const getUserGroupMembership = async (userId: string) => {
+    const impl = await getBacking();
+    return impl.getUserGroupMembership(userId);
+  };
+
+  const updateUserPoints = async (userId: string, points: number) => {
+    const impl = await getBacking();
+    return impl.updateUserPoints(userId, points);
+  };
+
+  return {
+    findUserByLineId,
+    createUser,
+    updateUserProfile,
+    getUserById,
+    getUserGroupMembership,
+    updateUserPoints,
+  } as const;
 };

@@ -12,6 +12,7 @@ import { createQuizRepository } from '../repositories/quizRepository';
 import { createAlertController } from '../controllers/alertController';
 import { createAlertService } from '../services/alertService';
 import { createAlertRepository } from '../repositories/alertRepository';
+import { createRequestController } from '../controllers/requestController';
 import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -56,5 +57,11 @@ const alertService = createAlertService(alertRepo);
 const alertController = createAlertController(alertService);
 
 router.post('/alerts/emergency', authMiddleware, alertController.postEmergencyAlert);
+
+// Request DI container
+const requestController = createRequestController();
+
+router.post('/requests', authMiddleware, requestController.postRequest);
+router.get('/requests/pending', authMiddleware, requestController.getPendingRequests);
 
 export default router;
