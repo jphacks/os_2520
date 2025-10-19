@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios"; // API通信のためにaxiosをインポート
+import apiClient from "../lib/axios";
 import { useAuth } from "../contexts/AuthContext";
-
-// APIのベースURLとエンドポイント
-const API_BASE_URL = "https://api.example.com"; // 実際のAPIのURLに置き換えてください
 
 // useLocationのstateに格納されると想定するクイズデータの型
 // (表示・回答に必要な最低限の情報を定義)
@@ -45,7 +42,7 @@ function YangPage() {
   const [response, setResponse] = useState<QuizResponse | null>(null); // APIの成功レスポンスを保持
 
   // 3. API設計に基づく回答送信処理
-  const handleAnswerSubmit = async () => {
+  const handleAnswerSubmit = async (): Promise<void> => {
     // クイズデータと選択肢が選択されているかを確認
     if (!quiz || !selectedOptionId) {
       alert("クイズ情報が見つからないか、選択肢が選ばれていません。");
@@ -53,40 +50,32 @@ function YangPage() {
     }
 
     // Path Paramsから quizId を取得
-    const { quizId } = quiz; 
-    
-    // Request Body の構成
+    const { quizId } = quiz;
+
+    // Request Body の構成（messageは任意のため、空の場合は含めない）
     const requestBody = {
       selectedOptionId: selectedOptionId,
-      message: message.trim() || undefined, // messageは任意のため、空の場合は含めない
+      ...(message.trim() && { message: message.trim() })
     };
-
-    // Header の構成 (Authorization: Bearer <JWT> は仮の実装)
-    const token = "YOUR_JWT_TOKEN"; // 実際のJWTトークンに置き換える必要があります
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
-
-    const url = `${API_BASE_URL}/quizzes/${quizId}/answer`;
 
     setIsLoading(true);
     setError(null);
     setResponse(null);
 
     try {
-      const result = await axios.post(url, requestBody, { headers });
+      // apiClientを使用してクイズ回答APIを呼び出し（httpOnly Cookie使用）
+      const result = await apiClient.post<QuizResponse>(`/quizzes/${quizId}/answer`, requestBody);
 
       // Success Response (200 OK) の処理
       // Response: {"isCorrect": true, "correctOptionId": "clx..."}
       setResponse(result.data);
       alert(`回答が送信されました！\n正解: ${result.data.isCorrect ? '⭕' : '❌'}`);
-      // 追加: 回答送信後にダッシュボードへ遷移
+      // 回答送信後にダッシュボードへ遷移
       navigate("/yang/dashboard");
 
-    } catch (err) {
+    } catch (err: any) {
       // Error Response の処理 (400, 401, 404, 409, 500など)
-      if (axios.isAxiosError(err) && err.response) {
+      if (err.response) {
         const status = err.response.status;
         let errorMessage = `APIエラー: ステータス${status}`;
 
@@ -99,7 +88,7 @@ function YangPage() {
           errorMessage = "既に回答済みです (Conflict)。";
         }
         setError(errorMessage);
-        console.error("API Error Response:", err.response.data);
+        console.error("クイズ回答エラー:", err.response.data);
       } else {
         setError("ネットワークエラーまたは予期せぬエラーが発生しました。");
         console.error("Unknown Error:", err);

@@ -70,12 +70,12 @@ const AuthCallbackPage = () => {
           else if (!user.hasGroup) {
             navigate('/group-setup');
           }
-          // すべて設定済みの場合は役割に応じたホーム画面へ
+          // すべて設定済みの場合は役割に応じたダッシュボードへ
           else {
             if (user.role === 'grandparent') {
-              navigate('/old'); // 祖父母ダッシュボード
+              navigate('/old/dashboard'); // 祖父母ダッシュボード
             } else {
-              navigate('/yang'); // 子・孫ダッシュボード
+              navigate('/yang/dashboard'); // 子・孫ダッシュボード
             }
           }
         }
