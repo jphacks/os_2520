@@ -36,7 +36,7 @@ function OldDashboard() {
         const data = await res.json();
         // API側が配列を返す前提。必要なら変換処理を追加してください。
         setQuizzes(data as QuizSummary[]);
-      } catch (e: any) {
+      } catch (e) {
         console.error("fetchHistory error:", e);
         setError("履歴の取得に失敗しました。");
       } finally {
