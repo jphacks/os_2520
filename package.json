@@ -6,9 +6,11 @@
     "node": "18.x"
   },
   "scripts": {
+    "prebuild": "node scripts/set-frontend-env.js",
     "build": "cd front && npm install && npm run build && cd ../backend && npm install && npm run build",
     "start": "cd backend && npm start",
-    "heroku-postbuild": "npm run build"
+    "heroku-postbuild": "npm run build",
+    "build:local": "cd front && npm install && npm run build && cd ../backend && npm install && npm run build"
   },
   "dependencies": {},
   "devDependencies": {},
