@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext.tsx";
 import SelectPage1 from "./pages/SelectPage1.tsx";
 import Old from "./pages/Old.tsx";
 import Yang from "./pages/Yang.tsx";
+import YangDashboard from "./pages/Yang_dashboard"; // 追加
 import OldDashboard from "./pages/Old_dashboard";
 import LoginPage from "./pages/LoginPage.tsx";
 import AuthCallbackPage from "./pages/AuthCallbackPage.tsx";
@@ -37,6 +38,7 @@ function App() {
           <Route path="/old/dashboard" element={<OldDashboard />} />
           <Route path="/yang" element={<Yang />} />
           <Route path="/request" element={<RequestPage />} />
+          <Route path="/yang/dashboard" element={<YangDashboard />} /> {/* 追加 */}     
 
           {/* 既存のルート（後で整理予定） */}
           <Route path="/" element={<SelectPage1 />} />

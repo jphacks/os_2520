@@ -81,6 +81,8 @@ function YangPage() {
       // Response: {"isCorrect": true, "correctOptionId": "clx..."}
       setResponse(result.data);
       alert(`回答が送信されました！\n正解: ${result.data.isCorrect ? '⭕' : '❌'}`);
+      // 追加: 回答送信後にダッシュボードへ遷移
+      navigate("/yang/dashboard");
 
     } catch (err) {
       // Error Response の処理 (400, 401, 404, 409, 500など)
@@ -220,6 +222,10 @@ function YangPage() {
 
       <button onClick={() => navigate("/")} disabled={isLoading} style={{ width: "100%", padding: "8px", backgroundColor: "#6c757d", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
         戻る
+      </button>
+      {/* 追加: ダッシュボードへ直接移動するボタン */}
+      <button onClick={() => navigate("/yang/dashboard")} disabled={isLoading} style={{ width: "100%", padding: "8px", marginTop: 8 }}>
+        ダッシュボードへ
       </button>
     </div>
   );

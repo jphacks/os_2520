@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import apiClient from "../lib/axios";
 
+const API_BASE_URL = "https://api.example.com"; // 実際のAPIのURLに変更してください
+
 function OldPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -64,9 +66,6 @@ const handleSend = async () => {
   }
 
   try {
-    // APIエンドポイントの指定
-    const API_BASE_URL = "https://api.example.com"; // 実際のAPIのURLに変更してください
-    
     // APIリクエストの作成
     const response = await fetch(`${API_BASE_URL}/quizzes`, {
       method: 'POST',
@@ -97,6 +96,28 @@ const handleSend = async () => {
   } catch (error) {
     console.error('エラー:', error);
     alert("エラーが発生しました。");
+  }
+};
+
+const sendEmergency = async () => {
+  if (!confirm("本当に家族全員に緊急通知を送りますか？")) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/alerts/emergency`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt") ?? ""}`,
+      },
+      body: JSON.stringify({ message: "緊急通知: 既定のメッセージ" }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || `status ${res.status}`);
+    }
+    alert("緊急通知を送信しました。");
+  } catch (e) {
+    console.error("sendEmergency error:", e);
+    alert("緊急通知の送信に失敗しました。");
   }
 };
 
@@ -147,7 +168,8 @@ const handleSend = async () => {
       </div>
 
       <div style={{ marginBottom: 12 }}>
-        <label style={{whiteSpace: "pre"}}>選択肢（4つ） ※各最大20文字           正解</label>
+        <label style={{whiteSpace: "pre"}}>選択肢（4つ）  ※各最大20文字                                    答え</label>
+
         <br />
         {choices.map((c, i) => (
           <div key={i} style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
@@ -176,7 +198,9 @@ const handleSend = async () => {
         <button onClick={() => navigate("/")}>戻る</button>
         <button onClick={() => navigate("/old/dashboard")}>ダッシュボードへ</button>
         <button onClick={handleSend}>出題</button>
-        <button>緊急通知</button>
+        <button onClick={sendEmergency} style={{ background: "#e53935", color: "#fff" }}>
+          緊急通知を送る
+        </button>
       </div>
     </div>
   );

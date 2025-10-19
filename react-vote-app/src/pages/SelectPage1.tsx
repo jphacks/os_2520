@@ -22,7 +22,8 @@ function SelectPage1() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h2>ユーザー名と選択をしてください</h2>
+      <h1>あんしんクイズ便</h1>
+      <h3>・ユーザー名と選択をしてください</h3>
       <div style={{ marginBottom: "15px" }}>
         <label>ユーザー名：</label>
         <input
